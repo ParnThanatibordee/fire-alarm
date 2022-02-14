@@ -2,7 +2,11 @@ import React from 'react'
 
 const Login = () => {
   return (
-    <div>dsadas</div>
+    <div className='loginPage'>
+        <div className='loginCard'>
+        
+        </div>
+    </div>
   )
 }
 
