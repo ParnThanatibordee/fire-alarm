@@ -1,4 +1,5 @@
 import React from 'react'
+import {Link} from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const SignUp = () => {
@@ -40,7 +41,9 @@ const SignUp = () => {
                                 </div>
                             </div>
                         </div>
-                        
+                        <div className="row">
+                            <Link to='/login'>Already have account</Link>
+                        </div>
                         <input type="submit" value="Register" className="btn btn-info btn-block" />
                     
                     </form>
