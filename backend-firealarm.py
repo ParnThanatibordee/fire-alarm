@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from fastapi.encoders import jsonable_encoder
 import json
 import datetime
@@ -28,6 +28,6 @@ menu_collection = db['record']
 
 class Fire(BaseModel):
     number: int
-    gas: int
+    gas: List[int]
+    fire: List[int]
     temp: int
-    fire: int
