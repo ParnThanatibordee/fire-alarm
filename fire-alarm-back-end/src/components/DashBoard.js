@@ -1,8 +1,12 @@
-import React from 'react'
+import React, {useState} from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Navbar, Container, Button} from 'react-bootstrap';
+import Popup from './Popup';
+import PopupDetail from './PopupDetail';
 
 const DashBoard = () => {
+  const [buttonPopup, setButtonPopup] = useState(false);
+
   return (
     <div className="DashboardPage">
       <Navbar>
@@ -23,7 +27,10 @@ const DashBoard = () => {
         <br/>
         <p>Status</p>
         <br/>
-        <Button>Detail</Button>
+        <Button onClick={() => setButtonPopup(true)}>Detail</Button>
+        <Popup trigger={buttonPopup} closePopup={() => setButtonPopup(false)}>
+          <PopupDetail/>
+        </Popup>
       </div>
     </div>
   )
