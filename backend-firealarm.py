@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from fastapi.encoders import jsonable_encoder
 import json
-import datetime
+from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 
 from pymongo import MongoClient
@@ -25,9 +25,22 @@ db = client["fire-alarm"]
 
 menu_collection = db['record']
 
-
 class Fire(BaseModel):
-    number: int
-    gas: List[int]
-    fire: List[int]
-    temp: int
+    number : int
+    flame: List[int]
+    gas: int
+    temp: List[int]
+
+@app.post("/fire-alarm/add")
+def add_alarm(alarm: Fire):
+    alarm_dict = {  'number': alarm.number, 'flame': alarm.flame,
+                    'gas': alarm.gas,'temp': alarm.temp,
+                    'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
+    
+    menu_collection.insert_one(alarm_dict)
+    return "add completed."
+
+
+@app.post("/fire-alarm/update")
+def update(alarm: Fire):
+    pass
