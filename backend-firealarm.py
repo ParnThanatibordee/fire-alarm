@@ -36,5 +36,3 @@ class Alarm(BaseModel):
     temp1: int 
     temp2: int 
     temp3: int
-
-
