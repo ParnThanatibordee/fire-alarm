@@ -42,7 +42,7 @@ def alarm():
     if(len(lst) == 1):
         flame = 1 if sum(lst[0]['flame']) >= 100 else 0
         gas = 1 if lst[0]['gas'] >= 2000 else 0
-        temp = 1 if sum(lst[0]['flame']) >= 58 else 0
+        temp = 1 if sum(lst[0]['temp']) >= 58 else 0
         return { 'flame': flame, 'gas':gas, 'temp':temp }
     else:
         raise HTTPException(404, "Not have data of this number.")
