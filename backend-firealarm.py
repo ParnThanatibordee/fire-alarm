@@ -26,17 +26,23 @@ db = client["fire-alarm"]
 menu_collection = db['record']
 avg_collection = db['record_avg']
 
-class Fire(BaseModel):
+class Alarm(BaseModel):
     number : int
-    flame: List[int]
     gas: int
-    temp: List[int]
+    flame1: int 
+    flame2: int 
+    flame3: int
+    temp1: int 
+    temp2: int 
+    temp3: int
 
 @app.post("/fire-alarm/update")
-def update(alarm: Fire):
+def update(alarm: Alarm):
     #add new record
-    alarm_dict = {  'number': alarm.number, 'flame': alarm.flame,
-                    'gas': alarm.gas,'temp': alarm.temp,
+    list_flame = [alarm.flame1, alarm.flame2, alarm.flame3]
+    list_temp = [alarm.temp1, alarm.temp2, alarm.temp3]
+    alarm_dict = {  'number': alarm.number, 'flame': list_flame,
+                    'gas': alarm.gas,'temp': list_temp,
                     'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
     menu_collection.insert_one(alarm_dict)
 
