@@ -37,13 +37,19 @@ class Alarm(BaseModel):
     temp3: int
 
 def line_notify(alarm: dict):
-    chk = 0
-    if(alarm['flame'] >= 100 and alarm['gas'] >= 100 and alarm['temp'] >= 100 )
-    url = 'https://notify-api.line.me/api/notify'
-    headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer '+alarm['line_token']}
-    msg = 'Hello LINE Notify'
-    requests.post(url, headers=headers, data = {'message':msg})
+    if alarm['flame'] >= 100 or alarm['gas'] >= 2000 or alarm['temp'] >= 58 :
+        msg ="Warning!!\n"
+        msg += f"At {alarm['address']}\n"
+        if alarm['flame'] >= 100:
+            msg += "Flame over 100\n"
+        if alarm['gas'] >= 100:
+            msg += "Gas over 2000\n"
+        if alarm['temp'] >= 100:
+            msg += "Temp over 58\n"
 
+        url = 'https://notify-api.line.me/api/notify'
+        headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer '+alarm['line_token']}
+        requests.post(url, headers=headers, data = {'message':msg})
 
 @app.post("/fire-alarm/update")
 def update(alarm: Alarm, level: int):
