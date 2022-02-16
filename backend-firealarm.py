@@ -24,6 +24,7 @@ client = MongoClient('mongodb://localhost', 27017)
 db = client["fire-alarm"]
 
 menu_collection = db['record']
+avg_collection = db['record_avg']
 
 class Fire(BaseModel):
     number : int
@@ -33,15 +34,38 @@ class Fire(BaseModel):
 
 @app.post("/fire-alarm/update")
 def update(alarm: Fire):
+    #add new record
     alarm_dict = {  'number': alarm.number, 'flame': alarm.flame,
                     'gas': alarm.gas,'temp': alarm.temp,
                     'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
     menu_collection.insert_one(alarm_dict)
 
+    #delete old record
     lst = list(menu_collection.find({'number':alarm.number},{'_id':0})) 
-    lst.sort(key=lambda x:x['update_time']) #sort for delete excess data
-    for i in range(len(lst)-3): #delete in db if more than 3
-        menu_collection.delete_one(lst[i])
+    lst.sort(key=lambda x:x['update_time']) #sort by time for delete excess data
+    for i in range(len(lst)-3): 
+        menu_collection.delete_one(lst[i]) #delete in db if more than 3
+
+    #update record_avg
+    chk = list(avg_collection.find({'number':alarm.number},{'_id':0}))  #check len in avg_collection
+    if len(chk) == 0: #if not have data -> add new 
+        avg_collection.insert_one(alarm_dict)
+    else: #if have date -> update 
+        #calculate average record
+        avg_flame = []
+        avg_temp = []
+        lst = list(menu_collection.find({'number':alarm.number},{'_id':0}))
+        for i in range(3):
+            avg_flame.append(sum(d['flame'][i] for d in lst)/len(lst))
+            avg_temp.append(sum(d['temp'][i] for d in lst)/len(lst))
+        avg_gas = sum(d['gas']for d in lst)/len(lst)
+
+        #update avg_collection
+        query = {"number": alarm.number}
+        new = { "$set":{"flame":avg_flame,"temp":avg_temp,
+                "gas":avg_gas,'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
+
+        avg_collection.update_one(query, new)
     
     return "update completed."
     
