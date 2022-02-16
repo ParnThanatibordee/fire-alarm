@@ -5,8 +5,8 @@ from fastapi.encoders import jsonable_encoder
 import json
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
-
 from pymongo import MongoClient
+import requests
 
 app = FastAPI()
 
@@ -36,13 +36,22 @@ class Alarm(BaseModel):
     temp2: int 
     temp3: int
 
+def line_notify(alarm: dict):
+    chk = 0
+    if(alarm['flame'] >= 100 and alarm['gas'] >= 100 and alarm['temp'] >= 100 )
+    url = 'https://notify-api.line.me/api/notify'
+    headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer '+alarm['line_token']}
+    msg = 'Hello LINE Notify'
+    requests.post(url, headers=headers, data = {'message':msg})
+
+
 @app.post("/fire-alarm/update")
-def update(alarm: Alarm):
+def update(alarm: Alarm, level: int):
     #add new record
     list_flame = [alarm.flame1, alarm.flame2, alarm.flame3]
     list_temp = [alarm.temp1, alarm.temp2, alarm.temp3]
-    alarm_dict = {  'number': alarm.number,'address': None, 'flame': list_flame,
-                    'gas': alarm.gas,'temp': list_temp,
+    alarm_dict = {  'number': alarm.number,'address': None, 'line_token': None,
+                    'flame': list_flame, 'gas': alarm.gas,'temp': list_temp,
                     'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
     menu_collection.insert_one(alarm_dict)
 
@@ -61,7 +70,7 @@ def update(alarm: Alarm):
         avg_flame = []
         avg_temp = []
         lst = list(menu_collection.find({'number':alarm.number},{'_id':0}))
-        for i in range(3):
+        for i in range(len(lst)):
             avg_flame.append(sum(d['flame'][i] for d in lst)/len(lst))
             avg_temp.append(sum(d['temp'][i] for d in lst)/len(lst))
         avg_gas = sum(d['gas']for d in lst)/len(lst)
@@ -72,6 +81,12 @@ def update(alarm: Alarm):
                 "gas":avg_gas,'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
 
         avg_collection.update_one(query, new)
+
+        #line notify
+        res = avg_collection.find_one({"number": alarm.number})
+        res["flame"] = sum(avg_flame)/len(avg_flame)
+        res["temp"] = sum(avg_temp)/len(avg_temp)
+        line_notify(res)
     
     return "update completed."
     
