@@ -36,7 +36,6 @@ class Alarm(BaseModel):
     temp2: int 
     temp3: int
 
-    
 @app.get("/fire-alarm/alarm")
 def alarm():
     lst = list(avg_collection.find({'number':1},{'_id':0})) #search number:1
@@ -47,7 +46,7 @@ def alarm():
         return { 'flame': flame, 'gas':gas, 'temp':temp }
     else:
         raise HTTPException(404, "Not have data of this number.")
-        
+
 @app.post("/fire-alarm/update")
 def update(alarm: Alarm):
     #add new record
