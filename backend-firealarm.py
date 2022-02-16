@@ -35,11 +35,12 @@ class Alarm(BaseModel):
     temp1: int 
     temp2: int 
     temp3: int
+
 @app.get("/fire-alarm/alarm")
 def alarm():
     lst = list(avg_collection.find({'number':1},{'_id':0})) #search number:1
     if(len(lst) == 1):
-        flame = 1 if sum(lst[0]['flame']) >= 50 else 0
+        flame = 1 if sum(lst[0]['flame']) >= 100 else 0
         gas = 1 if lst[0]['gas'] >= 2000 else 0
         temp = 1 if sum(lst[0]['flame']) >= 58 else 0
         return { 'flame': flame, 'gas':gas, 'temp':temp }
