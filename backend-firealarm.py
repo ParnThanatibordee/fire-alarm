@@ -26,7 +26,6 @@ db = client["fire-alarm"]
 menu_collection = db['record']
 avg_collection = db['record_avg']
 
-
 class Alarm(BaseModel):
     number : int
     gas: int
