@@ -27,7 +27,8 @@ menu_collection = db['record']
 
 
 class Fire(BaseModel):
-    number: int
-    gas: List[int]
-    fire: List[int]
-    temp: int
+    number : int
+    flame: List[int]
+    gas: int
+    temp: List[int]
+
