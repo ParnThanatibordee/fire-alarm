@@ -24,11 +24,17 @@ client = MongoClient('mongodb://localhost', 27017)
 db = client["fire-alarm"]
 
 menu_collection = db['record']
+avg_collection = db['record_avg']
 
 
-class Fire(BaseModel):
+class Alarm(BaseModel):
     number : int
-    flame: List[int]
     gas: int
-    temp: List[int]
+    flame1: int 
+    flame2: int 
+    flame3: int
+    temp1: int 
+    temp2: int 
+    temp3: int
+
 
