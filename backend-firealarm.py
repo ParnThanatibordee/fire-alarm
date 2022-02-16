@@ -41,7 +41,7 @@ def update(alarm: Alarm):
     #add new record
     list_flame = [alarm.flame1, alarm.flame2, alarm.flame3]
     list_temp = [alarm.temp1, alarm.temp2, alarm.temp3]
-    alarm_dict = {  'number': alarm.number, 'flame': list_flame,
+    alarm_dict = {  'number': alarm.number,'address': None, 'flame': list_flame,
                     'gas': alarm.gas,'temp': list_temp,
                     'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
     menu_collection.insert_one(alarm_dict)
