@@ -61,8 +61,8 @@ def update(alarm: Alarm):
     #add new record
     list_flame = [alarm.flame1, alarm.flame2, alarm.flame3]
     list_temp = [alarm.temp1, alarm.temp2, alarm.temp3]
-    alarm_dict = {  'number': alarm.number,'address': None, 'line_token': None,
-                    'flame': list_flame, 'gas': alarm.gas,'temp': list_temp,
+    alarm_dict = {  'number': alarm.number,'flame': list_flame, 
+                    'gas': alarm.gas,'temp': list_temp,
                     'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
     menu_collection.insert_one(alarm_dict)
 
@@ -86,7 +86,7 @@ def update(alarm: Alarm):
             avg_temp.append(sum(d['temp'][i] for d in lst)/len(lst))
         avg_gas = sum(d['gas']for d in lst)/len(lst)
 
-        #update avg_collection
+        #update
         query = {"number": alarm.number}
         new = { "$set":{"flame":avg_flame,"temp":avg_temp,
                 "gas":avg_gas,'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
