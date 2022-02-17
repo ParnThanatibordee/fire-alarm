@@ -5,8 +5,8 @@ from fastapi.encoders import jsonable_encoder
 import json
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
-
 from pymongo import MongoClient
+import requests
 
 app = FastAPI()
 
@@ -25,6 +25,7 @@ db = client["fire-alarm"]
 
 menu_collection = db['record']
 avg_collection = db['record_avg']
+configure_collection = db['configure']
 
 class Alarm(BaseModel):
     number : int
@@ -47,12 +48,32 @@ def alarm():
     else:
         raise HTTPException(404, "Not have data of this number.")
 
+@app.put("/fire-alarm/line-noti")    
+def line_notify(alarm: dict):
+    ref = configure_collection.find_one({'number':alarm['number']},{'_id':0})
+    if ref['line_token'] != None and ref['notification']:#user set line_token and notification is on
+        if( alarm['flame'] > ref['ref_flame'] or 
+            alarm['gas'] > ref['ref_gas'] or alarm['temp'] > ref['ref_temp']) :
+            msg ="Warning!!\n"
+            if ref['address'] != None:
+                msg += f"At {ref['address']}\n"
+            if alarm['flame'] > ref['ref_flame']:
+                msg += f"Flame over {ref['ref_flame']}\n"
+            if alarm['gas'] > ref['ref_gas']:
+                msg += f"Gas over {ref['ref_gas']}\n"
+            if alarm['temp'] > ref['ref_temp']:
+                msg += f"Temp over {ref['ref_temp']}\n"
+
+            url = 'https://notify-api.line.me/api/notify'
+            headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer '+ref['line_token']}
+            requests.post(url, headers=headers, data = {'message':msg})
+
 @app.post("/fire-alarm/update")
 def update(alarm: Alarm):
     #add new record
     list_flame = [alarm.flame1, alarm.flame2, alarm.flame3]
     list_temp = [alarm.temp1, alarm.temp2, alarm.temp3]
-    alarm_dict = {  'number': alarm.number,'address': None, 'flame': list_flame,
+    alarm_dict = {  'number': alarm.number,'flame': list_flame, 
                     'gas': alarm.gas,'temp': list_temp,
                     'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
     menu_collection.insert_one(alarm_dict)
@@ -72,17 +93,23 @@ def update(alarm: Alarm):
         avg_flame = []
         avg_temp = []
         lst = list(menu_collection.find({'number':alarm.number},{'_id':0}))
-        for i in range(3):
+        for i in range(len(lst)):
             avg_flame.append(sum(d['flame'][i] for d in lst)/len(lst))
             avg_temp.append(sum(d['temp'][i] for d in lst)/len(lst))
         avg_gas = sum(d['gas']for d in lst)/len(lst)
 
-        #update avg_collection
+        #update
         query = {"number": alarm.number}
         new = { "$set":{"flame":avg_flame,"temp":avg_temp,
                 "gas":avg_gas,'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
 
         avg_collection.update_one(query, new)
+
+        #line notify
+        res = avg_collection.find_one({"number": alarm.number})
+        res["flame"] = sum(avg_flame)/len(avg_flame)
+        res["temp"] = sum(avg_temp)/len(avg_temp)
+        line_notify(res)
     
     return "update completed."
 
