@@ -25,6 +25,7 @@ db = client["fire-alarm"]
 
 menu_collection = db['record']
 avg_collection = db['record_avg']
+configure_collection = db['configure']
 
 class Alarm(BaseModel):
     number : int
@@ -37,22 +38,26 @@ class Alarm(BaseModel):
     temp3: int
 
 def line_notify(alarm: dict):
-    if alarm['flame'] >= 100 or alarm['gas'] >= 2000 or alarm['temp'] >= 58 :
-        msg ="Warning!!\n"
-        msg += f"At {alarm['address']}\n"
-        if alarm['flame'] >= 100:
-            msg += "Flame over 100\n"
-        if alarm['gas'] >= 100:
-            msg += "Gas over 2000\n"
-        if alarm['temp'] >= 100:
-            msg += "Temp over 58\n"
+    ref = configure_collection.find_one({'number':alarm['number']},{'_id':0})
+    if ref['line_token'] != None and ref['notification']:#user set line_token and notification is on
+        if( alarm['flame'] > ref['ref_flame'] or 
+            alarm['gas'] > ref['ref_gas'] or alarm['temp'] > ref['ref_temp']) :
+            msg ="Warning!!\n"
+            if ref['address'] != None:
+                msg += f"At {ref['address']}\n"
+            if alarm['flame'] > ref['ref_flame']:
+                msg += f"Flame over {ref['ref_flame']}\n"
+            if alarm['gas'] > ref['ref_gas']:
+                msg += f"Gas over {ref['ref_gas']}\n"
+            if alarm['temp'] > ref['ref_temp']:
+                msg += f"Temp over {ref['ref_temp']}\n"
 
-        url = 'https://notify-api.line.me/api/notify'
-        headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer '+alarm['line_token']}
-        requests.post(url, headers=headers, data = {'message':msg})
+            url = 'https://notify-api.line.me/api/notify'
+            headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer '+ref['line_token']}
+            requests.post(url, headers=headers, data = {'message':msg})
 
 @app.post("/fire-alarm/update")
-def update(alarm: Alarm, level: int):
+def update(alarm: Alarm):
     #add new record
     list_flame = [alarm.flame1, alarm.flame2, alarm.flame3]
     list_temp = [alarm.temp1, alarm.temp2, alarm.temp3]
