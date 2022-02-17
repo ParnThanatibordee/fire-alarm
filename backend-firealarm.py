@@ -48,7 +48,7 @@ def alarm():
     else:
         raise HTTPException(404, "Not have data of this number.")
 
-@app.put("/fire-alarm/line-noti")    
+@app.get("/fire-alarm/line-noti")    
 def line_notify(alarm: dict):
     ref = configure_collection.find_one({'number':alarm['number']},{'_id':0})
     if ref['line_token'] != None and ref['notification']:#user set line_token and notification is on
