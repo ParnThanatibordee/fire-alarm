@@ -37,7 +37,7 @@ class Alarm(BaseModel):
     temp2: int 
     temp3: int
 
-@app.get("/fire-alarm/alarm")
+@app.get("/fire-alarm/alarm") #get-hardware
 def alarm():
     lst = list(avg_collection.find({'number':1},{'_id':0})) #search number:1
     if(len(lst) == 1):
@@ -48,10 +48,10 @@ def alarm():
     else:
         raise HTTPException(404, "Not have data of this number.")
 
-@app.get("/fire-alarm/line-noti")    
+@app.get("/fire-alarm/line-noti") 
 def line_notify(alarm: dict):
     ref = configure_collection.find_one({'number':alarm['number']},{'_id':0})
-    if ref['line_token'] != None and ref['notification']:#user set line_token and notification is on
+    if ref['line_token'] != None and ref['notification']: #user set line_token and notification is on
         if( alarm['flame'] > ref['ref_flame'] or 
             alarm['gas'] > ref['ref_gas'] or alarm['temp'] > ref['ref_temp']) :
             msg ="Warning!!\n"
@@ -68,7 +68,7 @@ def line_notify(alarm: dict):
             headers = {'content-type':'application/x-www-form-urlencoded','Authorization':'Bearer '+ref['line_token']}
             requests.post(url, headers=headers, data = {'message':msg})
 
-@app.post("/fire-alarm/update")
+@app.post("/fire-alarm/update") #post-hardware
 def update(alarm: Alarm):
     #add new record
     list_flame = [alarm.flame1, alarm.flame2, alarm.flame3]
@@ -102,7 +102,6 @@ def update(alarm: Alarm):
         query = {"number": alarm.number}
         new = { "$set":{"flame":avg_flame,"temp":avg_temp,
                 "gas":avg_gas,'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
-
         avg_collection.update_one(query, new)
 
         #line notify
