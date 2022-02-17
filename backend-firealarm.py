@@ -76,6 +76,20 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 
+@app.get("/fire-alarm/get-record")
+def get_fire_record():
+    room = db['record_avg'].find({})
+    result = []
+    print('room:', room)
+    for r in room:
+        result.append(
+            {'fire': sum(r['flame']) / len(r['flame']), 'temp': sum(r['temp']) / len(r['temp']),
+             'ref_temp': 50, 'gas': r['gas'],
+             'ref_gas': 2000})  # default ref temp 50-58, ref gas 2000-5000
+        print(r)
+    return {'Room': result}  # result
+
+
 @app.get("/fire-alarm/alarm")  # get-hardware
 def alarm():
     lst = list(avg_collection.find({'number': 1}, {'_id': 0}))  # each number:1
