@@ -179,9 +179,9 @@ def line_notify(alarm: dict):
             if alarm['flame'] < ref['ref_flame']:
                 msg += f"Flame occurred.\n"
             if alarm['gas'] > ref['ref_gas']:
-                msg += f"Gas over {ref['ref_gas']}.\n"
+                msg += f"Gas over {ref['ref_gas']} ppm.\n"
             if alarm['temp'] > ref['ref_temp']:
-                msg += f"Temperature over {ref['ref_temp']}.\n"
+                msg += f"Temperature over {ref['ref_temp']} degrees Celsius.\n"
 
             url = 'https://notify-api.line.me/api/notify'
             headers = {'content-type': 'application/x-www-form-urlencoded',
