@@ -5,7 +5,7 @@ import Login from './components/Login';
 import SignUp from './components/SignUp';
 import DashBoard from './components/DashBoard';
 
-function App() {
+const App = () => {
   return (
     <Router>
       <Switch>

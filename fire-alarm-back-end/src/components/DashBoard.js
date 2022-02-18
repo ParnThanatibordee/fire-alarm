@@ -5,7 +5,7 @@ import Popup from './Popup';
 import PopupDetail from './PopupDetail';
 import PopUpSetting from './PopUpSetting';
 
-const DashBoard = () => {
+export default function Dashboard() {
   const [buttonPopup, setButtonPopup] = useState(false);
   const [settingPopup, setSettingPopup] = useState(false);
 
@@ -41,5 +41,3 @@ const DashBoard = () => {
     </div>
   )
 }
-
-export default DashBoard
