@@ -8,7 +8,7 @@ export default function Dashboard() {
   const [data, setData] = useState('');
 
   const getData = async () => {
-    const response = await axios.get("https://ecourse.cpe.ku.ac.th/exceed15/api/bathroom/get-record")
+    const response = await axios.get("")
     setData(response.data)
   }
 
