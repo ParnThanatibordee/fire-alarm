@@ -3,9 +3,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import {Navbar, Container, Button} from 'react-bootstrap';
 import Popup from './Popup';
 import PopupDetail from './PopupDetail';
+import PopUpSetting from './PopUpSetting';
 
 const DashBoard = () => {
   const [buttonPopup, setButtonPopup] = useState(false);
+  const [settingPopup, setSettingPopup] = useState(false);
 
   return (
     <div className="DashboardPage">
@@ -28,8 +30,12 @@ const DashBoard = () => {
         <p>Status</p>
         <br/>
         <Button onClick={() => setButtonPopup(true)}>Detail</Button>
+        <Button onClick={() => setSettingPopup(true)}>Setting</Button>
         <Popup trigger={buttonPopup} closePopup={() => setButtonPopup(false)}>
           <PopupDetail/>
+        </Popup>
+        <Popup trigger={settingPopup} closePopup={() => setSettingPopup(false)}>
+          <PopUpSetting/>
         </Popup>
       </div>
     </div>

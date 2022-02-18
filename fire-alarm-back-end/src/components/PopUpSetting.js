@@ -1,8 +1,15 @@
 import React from 'react'
+import SwitchButton from './SwitchButton'
 
 const PopUpSetting = () => {
   return (
-    <div>PopUpSetting</div>
+    <div>
+      <p>PopUpSetting</p>
+      <p>Line Notification <SwitchButton/></p>
+      <p>Fire <SwitchButton/></p>
+      <p>Gas <SwitchButton/></p>
+      <p>Temp <SwitchButton/></p>
+  </div>
   )
 }
 
