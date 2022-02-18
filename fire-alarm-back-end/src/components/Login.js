@@ -1,8 +1,14 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import {Link, Redirect} from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Login = () => {
+    const handleLogin = (e) => {
+        e.preventDefault();
+
+        const {email, password} = e.target.element;
+    }
+
   return (
     <div className='loginPage'>
          <div id="login">

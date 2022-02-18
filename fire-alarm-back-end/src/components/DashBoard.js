@@ -1,13 +1,20 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {Navbar, Container, Button} from 'react-bootstrap';
-import Popup from './Popup';
-import PopupDetail from './PopupDetail';
-import PopUpSetting from './PopUpSetting';
+import {Navbar, Container} from 'react-bootstrap';
+import axios from 'axios';
+import Card from './Card';
 
 export default function Dashboard() {
-  const [buttonPopup, setButtonPopup] = useState(false);
-  const [settingPopup, setSettingPopup] = useState(false);
+  const [data, setData] = useState('');
+
+  const getData = async () => {
+    const response = await axios.get("https://ecourse.cpe.ku.ac.th/exceed15/api/bathroom/get-record")
+    setData(response.data)
+  }
+
+  useEffect(() => {
+    setInterval(getData, 1000)
+  }, [])
 
   return (
     <div className="DashboardPage">
@@ -22,22 +29,7 @@ export default function Dashboard() {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      <div className="dashboardcard">
-        <div className="circle" />
-        <br/>
-        <p>Place</p>
-        <br/>
-        <p>Status</p>
-        <br/>
-        <Button onClick={() => setButtonPopup(true)}>Detail</Button>
-        <Button onClick={() => setSettingPopup(true)}>Setting</Button>
-        <Popup trigger={buttonPopup} closePopup={() => setButtonPopup(false)}>
-          <PopupDetail/>
-        </Popup>
-        <Popup trigger={settingPopup} closePopup={() => setSettingPopup(false)}>
-          <PopUpSetting/>
-        </Popup>
-      </div>
+      <Card/>
     </div>
   )
 }
