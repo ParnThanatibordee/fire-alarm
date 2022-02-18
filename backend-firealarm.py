@@ -1,3 +1,4 @@
+from cgi import print_form
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -76,24 +77,56 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 
+def removeError(lst: list):
+    # calculate percentage discrepancy
+    chk1 = (abs(lst[0] - lst[1]) / lst[0])*100
+    chk2 = (abs(lst[0] - lst[2]) / lst[0])*100
+    chk3 = (abs(lst[1] - lst[2]) / lst[0])*100
+    print(lst[0],lst[1],lst[2])
+    print(chk1,chk2,chk3)
+    sum = 0 
+    sensors = 0
+    if (chk1 < 20 and chk2 < 20) or (chk1 < 20 and chk3 < 20):
+        sum = lst[0] + lst[1] + lst[2]
+        sensors = 3
+    elif chk1 < 20 :
+        sum = lst[0] + lst[1]
+        sensors = 2
+    elif chk2 < 20 :
+        sum = lst[0] + lst[2]
+        sensors = 2
+    elif chk3 < 20 :
+        sum = lst[1] + lst[2]
+        sensors = 2
+    else:
+        sum = lst[0] + lst[1] + lst[2]
+        sensors = 3
+
+    res = sum / sensors
+    return res
+
 @app.get("/fire-alarm/get-record") #get-frontend
 def get_fire_record():
     room = avg_collection.find()
     result = []
-    #print('room:', room)
     for r in room:
         ref = configure_collection.find_one({"number":r['number']})
         result.append(
             {   'number': r['number'],
-                'current_flame': sum(r['flame']) / len(r['flame']), 
+                'place': ref['place'],
+                'current_flame': removeError(r['flame']), 
                 'current_gas': r['gas'],
-                'current_temp': sum(r['temp']) / len(r['temp']),
+                'current_temp': removeError(r['temp']),
                 'ref_flame': ref['ref_flame'],
                 'ref_gas': ref['ref_gas'],
                 'ref_temp': ref['ref_temp']})  
                 # default ref temp 50-58, ref gas 2000-5000
-        #print(r)
-    return {'Room': result}  # result
+
+    if room:
+        return {'room': result}  # result
+    else:
+        raise HTTPException(404, "Not have data of any alarm.")
+    
 
 
 @app.get("/fire-alarm/alarm")  # get-hardware
@@ -101,9 +134,9 @@ def alarm():
     alarm = avg_collection.find_one({'number': 1}, {'_id': 0})  # search number:1
     if alarm:
         ref = configure_collection.find_one({'number': alarm['number']}, {'_id': 0})
-        flame = 1 if sum(alarm['flame']) < ref['ref_flame'] else 0
+        flame = 1 if removeError(alarm['flame']) < ref['ref_flame'] else 0
         gas = 1 if alarm['gas'] > ref['ref_gas'] else 0
-        temp = 1 if sum(alarm['temp']) > ref['ref_temp'] else 0
+        temp = 1 if removeError(alarm['temp']) > ref['ref_temp'] else 0
         return {'flame': flame, 'gas': gas, 'temp': temp}
     else:
         raise HTTPException(404, "Not have data of this number.")
@@ -112,11 +145,11 @@ def alarm():
 def line_notify(alarm: dict):
     ref = configure_collection.find_one({'number': alarm['number']}, {'_id': 0})
     if ref['line_token']  and ref['notification'] == True:  # user set line_token and notification is on
-        if (alarm['flame'] > ref['ref_flame'] or
+        if (alarm['flame'] < ref['ref_flame'] or
                 alarm['gas'] > ref['ref_gas'] or alarm['temp'] > ref['ref_temp']):
             msg = "Warning!!\n"
-            if ref['address'] is not None:
-                msg += f"At {ref['address']}\n"
+            if ref['place']:
+                msg += f"At {ref['place']}\n"
             if alarm['flame'] < ref['ref_flame']:
                 msg += f"Flame less than {ref['ref_flame']}\n"
             if alarm['gas'] > ref['ref_gas']:
@@ -149,7 +182,7 @@ def update(alarm: Alarm):
     # add default configure_collection
     chk = configure_collection.find_one({'number': alarm.number}, {'_id': 0})  # check data in configure_collection
     if not chk:
-        default_dict = {'number': alarm.number, 'address': None, 'line_token': None,
+        default_dict = {'number': alarm.number, 'place': None, 'line_token': None,
                         'ref_flame': 500, 'ref_gas': 2000, 'ref_temp': 50,
                         'notification': True, 'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
         configure_collection.insert_one(default_dict)
@@ -176,8 +209,9 @@ def update(alarm: Alarm):
     
         # line notify
         res = avg_collection.find_one({"number": alarm.number})
-        res["flame"] = sum(avg_flame) / len(avg_flame)
-        res["temp"] = sum(avg_temp) / len(avg_temp)
+        res["flame"] = removeError(avg_flame)
+        res["temp"] = removeError(avg_temp)
+        print(res["flame"], res["temp"])
         line_notify(res)
 
     return "Update completed."
