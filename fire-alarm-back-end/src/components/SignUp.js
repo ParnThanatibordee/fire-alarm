@@ -4,10 +4,17 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const SignUp = () => {
   const [currentUser, setCurrentUser] = useState(null);
+  
     const handleSubmit = (e) => {
         e.preventDefault();
         const {email, password} = e.target.element;
-    }
+
+    fetch('', {
+        method: "POST",
+        header: {'Content-Type': 'application/json'},
+        data : JSON.stringify(email.value, password.value)
+    });
+}
 
     if (currentUser) {
         return <Redirect to='/login'/>

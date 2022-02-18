@@ -7,6 +7,12 @@ const Login = () => {
         e.preventDefault();
 
         const {email, password} = e.target.element;
+
+        fetch('', {
+            method: "POST",
+            header: {'Content-Type': 'application/json'},
+            data : JSON.stringify(email.value, password.value)
+        });
     }
 
   return (
