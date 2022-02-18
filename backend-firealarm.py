@@ -6,10 +6,9 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, timedelta
 from fastapi.middleware.cors import CORSMiddleware
-
 from pymongo import MongoClient
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+SECRET_KEY = "6449df181d2b4ea7fd5063d9dda7e7acad40a5bb34b02c5af7e609f1914dd812"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -67,7 +66,7 @@ class Fire(BaseModel):
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 app = FastAPI()
 
@@ -138,7 +137,7 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     return current_user
 
 
-@app.post("/users/login", response_model=Token)
+@app.post("/login", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
@@ -154,7 +153,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@app.post('/users/register')
+@app.post('/register')
 async def create_user(user: UserRegistration):
     # add event not create if username already exist
     print(user)
@@ -162,13 +161,14 @@ async def create_user(user: UserRegistration):
                          "hashed_password": get_password_hash(user.password), "disabled": False}
     print(registration_user)
     db['users'].insert_one(registration_user)
+    return "Successful registration."
 
 
-@app.get("/users/me/", response_model=User)
+@app.get("/users/me", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
 
 
-@app.get("/users/me/items/")
+@app.get("/users/me/items")
 async def read_own_items(current_user: User = Depends(get_current_active_user)):
     return [{"item_id": "Foo", "owner": current_user.username}]
