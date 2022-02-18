@@ -97,11 +97,12 @@ def get_fire_record():
 
 @app.get("/fire-alarm/alarm")  # get-hardware
 def alarm():
-    lst = list(avg_collection.find({'number': 1}, {'_id': 0}))  # each number:1
-    if len(lst) == 1:
-        flame = 1 if sum(lst[0]['flame']) >= 100 else 0
-        gas = 1 if lst[0]['gas'] >= 2000 else 0
-        temp = 1 if sum(lst[0]['temp']) >= 58 else 0
+    alarm = avg_collection.find_one({'number': 1}, {'_id': 0})  # search number:1
+    if alarm:
+        ref = configure_collection.find_one({'number': alarm['number']}, {'_id': 0})
+        flame = 1 if sum(alarm['flame']) < ref['ref_flame'] else 0
+        gas = 1 if alarm['gas'] > ref['ref_gas'] else 0
+        temp = 1 if sum(alarm['temp']) > ref['ref_temp'] else 0
         return {'flame': flame, 'gas': gas, 'temp': temp}
     else:
         raise HTTPException(404, "Not have data of this number.")
