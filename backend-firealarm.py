@@ -23,8 +23,8 @@ app.add_middleware(
 client = MongoClient('mongodb://localhost', 27017)
 db = client["fire-alarm"]
 
-menu_collection = db['record']
-
+menu_collection = db['record_avg']
+default_collection = db['default']
 
 class Fire(BaseModel):
     number: int
@@ -32,9 +32,12 @@ class Fire(BaseModel):
     fire: List[int]
     temp: int
 
-@app.get("/fire-alarm/status")
-def result():
-    result = menu_collection.find_one()
+@app.get("/fire-alarm/status/{number}")
+def result(number: int):
+
+    default = default_collection.find_one({"number": number}, {"_id":0})
+
+    result = menu_collection.find_one({"number": number}, {"_id":0})
 
     #ดูว่ามีค่าของ sensor temp ต่างกันเกินไหม & เลือก
     checkTemp1 = (abs(result["temp"][0] - result["temp"][1]) / result["temp"][0])*100
@@ -85,11 +88,18 @@ def result():
         sensors = 3
 
     avgflame = sum / sensors
-    
-    gas = result["gas"]
 
-    return {
-        "status1" : checkTemp1,
-        "status2" : checkTemp2,
-        "status3" : checkTemp3
+    if (avgflame > default["ref_fire"]) :
+        fire = True
+    else:
+        fire = False
+
+    gas = result["gas"]    
+
+    return{
+        "fire" : fire,
+        "temp" : avgTemp,
+        "ref_temp": default["ref_temp"],
+        "gas":  gas,
+        "ref_gas": default["ref_gas"]
     }
