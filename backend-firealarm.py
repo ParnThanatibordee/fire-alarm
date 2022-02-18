@@ -177,11 +177,11 @@ def line_notify(alarm: dict):
             if ref['place']:
                 msg += f"At {ref['place']}\n"
             if alarm['flame'] < ref['ref_flame']:
-                msg += f"Flame less than {ref['ref_flame']}\n"
+                msg += f"Flame occurred.\n"
             if alarm['gas'] > ref['ref_gas']:
-                msg += f"Gas over {ref['ref_gas']}\n"
+                msg += f"Gas over {ref['ref_gas']}.\n"
             if alarm['temp'] > ref['ref_temp']:
-                msg += f"Temp over {ref['ref_temp']}\n"
+                msg += f"Temperature over {ref['ref_temp']}.\n"
 
             url = 'https://notify-api.line.me/api/notify'
             headers = {'content-type': 'application/x-www-form-urlencoded',
