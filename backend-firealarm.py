@@ -84,9 +84,10 @@ def get_fire_record():
     for r in room:
         ref = configure_collection.find_one({"number":r['number']})
         result.append(
-            {   'flame': sum(r['flame']) / len(r['flame']), 
-                'gas': r['gas'],
-                'temp': sum(r['temp']) / len(r['temp']),
+            {   'number': r['number'],
+                'current_flame': sum(r['flame']) / len(r['flame']), 
+                'current_gas': r['gas'],
+                'current_temp': sum(r['temp']) / len(r['temp']),
                 'ref_flame': ref['ref_flame'],
                 'ref_gas': ref['ref_gas'],
                 'ref_temp': ref['ref_temp']})  
@@ -155,7 +156,7 @@ def update(alarm: Alarm):
 
     # update record_avg
     chk = avg_collection.find_one({'number': alarm.number}, {'_id': 0})  # check data in avg_collection
-    if not chk:  # if not have data -> add new
+    if chk == None:  # if not have data -> add new
         avg_collection.insert_one(alarm_dict)
     else:  # if have date -> update
         # calculate average record
