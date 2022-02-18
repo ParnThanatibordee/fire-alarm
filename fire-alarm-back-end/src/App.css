@@ -70,25 +70,20 @@
 }
 
 .dashboardPage {
-  background-color: #282c34;
+  background-color: #eef0f5;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+
 }
 
 .dashboardcard {
   padding: 2em 0;
   height: 350px;
-  width: 350px;
+  width: 100%;
   color: white;
   border: black;
   border-radius: 10px;
   overflow: hidden;
-  background-color: gray;
+  background-color: rgb(173, 159, 158);
   text-align: center;
 }
 

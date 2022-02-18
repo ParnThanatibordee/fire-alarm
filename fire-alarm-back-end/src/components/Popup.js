@@ -6,8 +6,8 @@ const Popup = (props) => {
   return (props.trigger) ? (
     <div className="popup">
         <div className="popupInner">
-            <Button onClick={props.closePopup}>Close</Button>
             {props.children}
+            <Button onClick={props.closePopup}>Close</Button>
         </div>
     </div>
   ): "";
