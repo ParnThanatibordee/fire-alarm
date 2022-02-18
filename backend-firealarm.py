@@ -140,7 +140,7 @@ def get_fire_record():
 @app.post("/fire-alarm/configure") # post-frontend
 def configure(alarm: Configure):
     chk = configure_collection.find_one({'number': alarm.number}, {'_id': 0})
-    if chk:
+    if chk: # update configure_collection
         new = { "$set": {"number": alarm.number, "place": alarm.place, "line_token": alarm.line_token,
                 "ref_flame": alarm.ref_flame, "ref_gas": alarm.ref_gas, "ref_temp": alarm.ref_temp,
                 "notification": alarm.notification,
@@ -158,7 +158,7 @@ def configure(alarm: Configure):
 @app.get("/fire-alarm/alarm")  # get-hardware
 def alarm():
     alarm = avg_collection.find_one({'number': 1}, {'_id': 0})  # search number:1
-    if alarm:
+    if alarm: # Check if an alarming is required
         ref = configure_collection.find_one({'number': alarm['number']}, {'_id': 0})
         flame = 1 if removeError(alarm['flame']) < ref['ref_flame'] else 0
         gas = 1 if alarm['gas'] > ref['ref_gas'] else 0
@@ -186,7 +186,7 @@ def line_notify(alarm: dict):
             url = 'https://notify-api.line.me/api/notify'
             headers = {'content-type': 'application/x-www-form-urlencoded',
                        'Authorization': 'Bearer ' + ref['line_token']}
-            requests.post(url, headers=headers, data={'message': msg})
+            requests.post(url, headers=headers, data={'message': msg}) # send line notification
 
 
 @app.post("/fire-alarm/update")  # post-hardware
@@ -202,11 +202,11 @@ def update(alarm: Alarm):
     # delete old record
     lst = list(menu_collection.find({'number': alarm.number}, {'_id': 0}))
     lst.sort(key=lambda x: x['update_time'])  # sort by time for delete excess data
-    for i in range(len(lst) - 3):
-        menu_collection.delete_one(lst[i])  # delete in db if more than 3
+    for i in range(len(lst) - 5):
+        menu_collection.delete_one(lst[i])  # delete in db if more than 5
 
     # add default configure_collection
-    chk = configure_collection.find_one({'number': alarm.number}, {'_id': 0})  # check data in configure_collection
+    chk = configure_collection.find_one({'number': alarm.number}, {'_id': 0}) 
     if not chk:
         default_dict = {'number': alarm.number, 'place': None, 'line_token': None,
                         'ref_flame': 500, 'ref_gas': 2000, 'ref_temp': 50,
@@ -215,14 +215,14 @@ def update(alarm: Alarm):
 
     # update record_avg
     chk = avg_collection.find_one({'number': alarm.number}, {'_id': 0})  # check data in avg_collection
-    if chk == None:  # if not have data -> add new
+    if chk == None:  # if not have data => add new
         avg_collection.insert_one(alarm_dict)
-    else:  # if have date -> update
+    else:  # if have date => update
         # calculate average record
         avg_flame = []
         avg_temp = []
         lst = list(menu_collection.find({'number': alarm.number}, {'_id': 0}))
-        for i in range(len(lst)):
+        for i in range(3): # 3 sensors
             avg_flame.append(sum(d['flame'][i] for d in lst) / len(lst))
             avg_temp.append(sum(d['temp'][i] for d in lst) / len(lst))
         avg_gas = sum(d['gas'] for d in lst) / len(lst)
