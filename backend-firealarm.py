@@ -72,6 +72,16 @@ class Alarm(BaseModel):
     temp3: int
 
 
+class Configure(BaseModel):
+    number: int
+    place: str
+    line_token: str
+    ref_flame: int
+    ref_gas: int
+    ref_temp: int
+    notification: bool
+
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
@@ -82,8 +92,7 @@ def removeError(lst: list):
     chk1 = (abs(lst[0] - lst[1]) / lst[0])*100
     chk2 = (abs(lst[0] - lst[2]) / lst[0])*100
     chk3 = (abs(lst[1] - lst[2]) / lst[0])*100
-    print(lst[0],lst[1],lst[2])
-    print(chk1,chk2,chk3)
+
     sum = 0 
     sensors = 0
     if (chk1 < 20 and chk2 < 20) or (chk1 < 20 and chk3 < 20):
@@ -123,11 +132,28 @@ def get_fire_record():
                 # default ref temp 50-58, ref gas 2000-5000
 
     if room:
-        return {'room': result}  # result
+        return {'room': result}
     else:
         raise HTTPException(404, "Not have data of any alarm.")
     
 
+@app.post("/fire-alarm/configure") # post-frontend
+def configure(alarm: Configure):
+    chk = configure_collection.find_one({'number': alarm.number}, {'_id': 0})
+    if chk:
+        new = { "$set": {"number": alarm.number, "place": alarm.place, "line_token": alarm.line_token,
+                "ref_flame": alarm.ref_flame, "ref_gas": alarm.ref_gas, "ref_temp": alarm.ref_temp,
+                "notification": alarm.notification,
+                "update_time": datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
+
+        query = {'number': alarm.number}
+        configure_collection.update_one(query, new)
+        return {
+            "result": "Update completed."
+        }
+    else:
+        raise HTTPException(404, "Not have data of this number.")
+    
 
 @app.get("/fire-alarm/alarm")  # get-hardware
 def alarm():
@@ -211,10 +237,11 @@ def update(alarm: Alarm):
         res = avg_collection.find_one({"number": alarm.number})
         res["flame"] = removeError(avg_flame)
         res["temp"] = removeError(avg_temp)
-        print(res["flame"], res["temp"])
         line_notify(res)
 
-    return "Update completed."
+    return {
+        "result" : "Update completed."
+    }
 
 
 def verify_password(plain_password, hashed_password):
@@ -307,7 +334,9 @@ async def create_user(user: UserRegistration):
                          "hashed_password": get_password_hash(user.password), "disabled": False}
     print(registration_user)
     db['users'].insert_one(registration_user)
-    return "Successful registration."
+    return {
+        "result": "Successful registration."
+    }
 
 
 @app.get("/users/me", response_model=User)
