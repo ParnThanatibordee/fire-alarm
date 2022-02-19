@@ -1,10 +1,11 @@
 from cgi import print_form
+from operator import ne
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
 from datetime import datetime, timedelta
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
@@ -63,13 +64,15 @@ class UserRegistration(BaseModel):
 
 class Alarm(BaseModel):
     gas: float
-    flame1: float
-    flame2: float
-    flame3: float
     temp1: float
     temp2: float
     temp3: float
 
+
+class Flame(BaseModel):
+    flame1: float
+    flame2: float
+    flame3: float
 
 class Configure(BaseModel):
     number: int
@@ -145,7 +148,7 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
 
 # get record of average value
 @app.get("/fire-alarm/get-record")  # get-frontend
-def get_fire_record(current_user: User = Depends(get_current_active_user)):
+def get_fire_record():
     room = avg_collection.find()
     result = []
     for r in room:
@@ -175,7 +178,7 @@ def get_fire_record(current_user: User = Depends(get_current_active_user)):
 
 # config the setting status for example, set reference value, turn on/off line notification etc.
 @app.post("/fire-alarm/configure")  # post-frontend
-def configure(alarm: Configure, current_user: User = Depends(get_current_active_user)):
+def configure(alarm: Configure):
     chk = configure_collection.find_one({'number': alarm.number}, {'_id': 0})
     if chk: # update configure_collection
         new = { "$set": {"place": alarm.place, "line_token": alarm.line_token,
@@ -229,61 +232,75 @@ def line_notify(alarm: dict):
             requests.post(url, headers=headers, data={'message': msg})  # send line notification
 
 
-@app.post("/fire-alarm/update/{num}")  # post-hardware
-def update(alarm: Alarm, num: int):
-    # add new record
+@app.post("/fire-alarm/update1/{num}")  # post-hardware 1
+def update1(alarm: Flame, num: int):
     list_flame = [alarm.flame1, alarm.flame2, alarm.flame3]
-    list_temp = [alarm.temp1, alarm.temp2, alarm.temp3]
-    alarm_dict = {'number': num, 'flame': list_flame,
-                  'gas': alarm.gas, 'temp': list_temp,
-                  'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
+    alarm_dict = {  'number': num, 'flame': list_flame,
+                    'gas': None, 'temp': None,
+                    'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
     menu_collection.insert_one(alarm_dict)
+    return "Update flame completed."
 
-    # delete old record
-    lst = list(menu_collection.find({'number': num}, {'_id': 0}))
-    lst.sort(key=lambda x: x['update_time'])  # sort by time for delete excess data
-    for i in range(len(lst) - 5):
-        menu_collection.delete_one(lst[i])  # delete in db if more than 5
+@app.post("/fire-alarm/update2/{num}")  # post-hardware 2
+def update2(alarm: Alarm, num: int):
+    query = {'number': num, 'temp': None}
+    chk = menu_collection.find_one(query,  {'_id': 0})
+    if chk:
+        # add new record
+        list_temp = [alarm.temp1, alarm.temp2, alarm.temp3]
+        query = {"number": num, 'gas': None, 'temp': None}
+        new = {"$set": {"temp": list_temp, "gas": alarm.gas, 
+                        'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
+        menu_collection.update_one(query, new)
 
-    # add default configure_collection
-    chk = configure_collection.find_one({'number': num}, {'_id': 0})
-    if not chk:
-        default_dict = {'number': num, 'place': None, 'line_token': None,
-                        'ref_flame': 500, 'ref_gas': 2000, 'ref_temp': 50,
-                        'flame_notification': True, 'gas_notification': True, 
-                        'temp_notification': True, 'line_notification': True,
-                        'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
-        configure_collection.insert_one(default_dict)
-
-    # update record_avg
-    chk = avg_collection.find_one({'number': num}, {'_id': 0})  # check data in avg_collection
-    if chk is None:  # if not have data => add new
-        avg_collection.insert_one(alarm_dict)
-    else:  # if have date => update
-        # calculate average record
-        avg_flame = []
-        avg_temp = []
+        # delete old record
         lst = list(menu_collection.find({'number': num}, {'_id': 0}))
-        for i in range(3):  # 3 sensors
-            avg_flame.append(sum(d['flame'][i] for d in lst) / len(lst))
-            avg_temp.append(sum(d['temp'][i] for d in lst) / len(lst))
-        avg_gas = sum(d['gas'] for d in lst) / len(lst)
+        lst.sort(key=lambda x: x['update_time'])  # sort by time for delete excess data
+        for i in range(len(lst) - 5):
+            menu_collection.delete_one(lst[i])  # delete in db if more than 5
 
-        # update
-        query = {"number": num}
-        new = {"$set": {"flame": avg_flame, "temp": avg_temp,
-                        "gas": avg_gas, 'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
-        avg_collection.update_one(query, new)
+        # add default configure_collection
+        chk = configure_collection.find_one({'number': num}, {'_id': 0})
+        if not chk:
+            default_dict = {'number': num, 'place': None, 'line_token': None,
+                            'ref_flame': 500, 'ref_gas': 2000, 'ref_temp': 50,
+                            'flame_notification': True, 'gas_notification': True, 
+                            'temp_notification': True, 'line_notification': True,
+                            'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
+            configure_collection.insert_one(default_dict)
 
-        # line notify
-        res = avg_collection.find_one({"number": num})
-        res["flame"] = removeError(avg_flame)
-        res["temp"] = removeError(avg_temp)
-        line_notify(res)
+        # update record_avg
+        chk = avg_collection.find_one({'number': num}, {'_id': 0})  # check data in avg_collection
+        if chk is None:  # if not have data => add new
+            alarm_dict = menu_collection.find_one({'number': num})
+            avg_collection.insert_one(alarm_dict)
+        else:  # if have date => update
+            # calculate average record
+            avg_flame = []
+            avg_temp = []
+            query = {'number': num, 'temp':{"$ne": None}}
+            lst = list(menu_collection.find(query,  {'_id': 0}))
+            for i in range(3):  # 3 sensors
+                avg_flame.append(sum(d['flame'][i] for d in lst) / len(lst))
+                avg_temp.append(sum(d['temp'][i] for d in lst) / len(lst))
+            avg_gas = sum(d['gas'] for d in lst) / len(lst)
 
-    return {
-        "result": "Update completed."
-    }
+            # update
+            query = {"number": num}
+            new = {"$set": {"flame": avg_flame, "temp": avg_temp,
+                            "gas": avg_gas, 'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
+            avg_collection.update_one(query, new)
+
+            # line notify
+            res = avg_collection.find_one({"number": num})
+            res["flame"] = removeError(avg_flame)
+            res["temp"] = removeError(avg_temp)
+            line_notify(res)
+
+        return {
+            "result": "Update alarm completed."
+        }
+    return "Can't update now."
 
 
 def verify_password(plain_password, hashed_password):
