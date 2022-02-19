@@ -1,5 +1,3 @@
-from cgi import print_form
-from operator import ne
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -170,10 +168,7 @@ def get_fire_record():
                 })  
                 # default ref temp 50-58, ref gas 2000-5000
 
-    if room:
-        return {'room': result}
-    else:
-        raise HTTPException(404, "Not have data of any alarm.")
+    return {'room': result}
 
 
 # config the setting status for example, set reference value, turn on/off line notification etc.
@@ -202,6 +197,7 @@ def alarm(num: int):
     alarm = avg_collection.find_one({'number': num}, {'_id': 0})
     if alarm:  # Check if an alarming is required
         ref = configure_collection.find_one({'number': alarm['number']}, {'_id': 0})
+
         flame = 1 if removeError(alarm['flame']) < ref['ref_flame'] else 0
         gas = 1 if alarm['gas'] > ref['ref_gas'] else 0
         temp = 1 if removeError(alarm['temp']) > ref['ref_temp'] else 0
@@ -213,11 +209,11 @@ def alarm(num: int):
 # send line notify message to line token
 def line_notify(alarm: dict):
     ref = configure_collection.find_one({'number': alarm['number']}, {'_id': 0})
-    if ref['line_token']  and ref['line_notification']:  # user set line_token and notification is on
+    if ref['line_token'] != ''  and ref['line_notification']:  # user set line_token and notification is on
         if (alarm['flame'] < ref['ref_flame'] or
                 alarm['gas'] > ref['ref_gas'] or alarm['temp'] > ref['ref_temp']):
             msg = "Warning!!\n"
-            if ref['place']:
+            if ref['place'] != '':
                 msg += f"At {ref['place']}\n"
             if alarm['flame'] < ref['ref_flame']:
                 msg += f"Flame occurred.\n"
@@ -233,19 +229,22 @@ def line_notify(alarm: dict):
 
 
 @app.post("/fire-alarm/update1/{num}")  # post-hardware 1
-def update1(alarm: Flame, num: int):
+def update1(alarm: Flame, num: int): # only update flame
     list_flame = [alarm.flame1, alarm.flame2, alarm.flame3]
     alarm_dict = {  'number': num, 'flame': list_flame,
                     'gas': None, 'temp': None,
                     'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
     menu_collection.insert_one(alarm_dict)
-    return "Update flame completed."
+    return {
+        "result": "Update flame completed."
+    }
 
 @app.post("/fire-alarm/update2/{num}")  # post-hardware 2
-def update2(alarm: Alarm, num: int):
+def update2(alarm: Alarm, num: int): 
     query = {'number': num, 'temp': None}
     chk = menu_collection.find_one(query,  {'_id': 0})
-    if chk:
+
+    if chk: # check data with flame only
         # add new record
         list_temp = [alarm.temp1, alarm.temp2, alarm.temp3]
         query = {"number": num, 'gas': None, 'temp': None}
@@ -262,7 +261,7 @@ def update2(alarm: Alarm, num: int):
         # add default configure_collection
         chk = configure_collection.find_one({'number': num}, {'_id': 0})
         if not chk:
-            default_dict = {'number': num, 'place': None, 'line_token': None,
+            default_dict = {'number': num, 'place': "", 'line_token': "",
                             'ref_flame': 500, 'ref_gas': 2000, 'ref_temp': 50,
                             'flame_notification': True, 'gas_notification': True, 
                             'temp_notification': True, 'line_notification': True,
@@ -300,7 +299,7 @@ def update2(alarm: Alarm, num: int):
         return {
             "result": "Update alarm completed."
         }
-    return "Can't update now."
+    raise HTTPException(404, "Please update flame first.")
 
 
 def verify_password(plain_password, hashed_password):
