@@ -329,6 +329,21 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 @app.post('/register')
 async def create_user(user: UserRegistration):
     # add event not create if username already exist
+    username_exist = []
+    email_exist = []
+    users = db['users'].find({}, {"_id": 0})
+    for i in users:
+        username_exist.append(i['username'])
+        email_exist.append(i['email'])
+
+    if user.email in email_exist:
+        return {
+            "result": "This email is already exist."
+        }
+    elif user.username in username_exist:
+        return {
+            "result": "This name is already exist."
+        }
     print(user)
     registration_user = {"username": user.username, "full_name": user.full_name, "email": user.email,
                          "hashed_password": get_password_hash(user.password), "disabled": False}
