@@ -128,6 +128,12 @@
   position: absolute;
 }
 
+@media (min-width: 768px) {
+  .popup-detail {
+    width: 640px;
+  }
+}
+
 @media (min-width: 992px) {
   .popup-detail {
     width: 800px;
