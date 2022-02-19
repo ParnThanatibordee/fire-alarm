@@ -1,55 +1,99 @@
 import React from 'react'
-import {Link} from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Link } from 'react-router-dom'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import Form from 'react-bootstrap/Form'
+import { Button, Row, Col } from 'react-bootstrap'
 
 const SignUp = () => {
+  const [details, setDetails] = React.useState({
+    fullname: '',
+    email: '',
+    password: '',
+    confirmpassword: '',
+  })
+  const handleSubmitClick = async (e) => {
+    e.preventDefault()
+    console.log(details)
+  }
+
   return (
-    <div className="row centered-form">
-        <div className="col-xs-12 col-sm-8 col-md-4 col-sm-offset-2 col-md-offset-4">
-            <div className="panel panel-default">
-                <div className="panel-heading">
-                    <h3 className="panel-title">Fire Alart Sign UP</h3>
-                </div>
-                <div className="panel-body">
-                    <form role="form">
-                        <div className="row">
-                            <div className="col-xs-6 col-sm-6 col-md-6">
-                                <div className="form-group">
-                                    <input type="text" name="first_name" id="first_name" className="form-control input-sm" placeholder="First Name"  />
-                                </div>
-                            </div>
-                            <div className="col-xs-6 col-sm-6 col-md-6">
-                                <div className="form-group">
-                                    <input type="text" name="last_name" id="last_name" className="form-control input-sm" placeholder="Last Name" />
-                                </div>
-                            </div>
-                        </div>
+    <div className="loginPage">
+      <div id="login">
+        <h1 className="text-center text-white pt-5">Fire Alarm</h1>
+        <div className="container">
+          <div
+            id="login-row"
+            className="row justify-content-center align-items-center"
+          >
+            <div id="login-column" className="col-md-6">
+              <div id="login-box" className="col-md-12">
+                <Form>
+                  <h4>Sign up</h4>
 
-                        <div className="form-group">
-                            <input type="email" name="email" id="email" className="form-control input-sm" placeholder="Email Address" />
-                        </div>
+                  <Form.Group controlId="formGridFullName">
+                    <Form.Label>Full name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Firstname Lastname"
+                      onChange={(e) =>
+                        setDetails({ ...details, fullname: e.target.value })
+                      }
+                      value={details.fullname}
+                    />
+                  </Form.Group>
 
-                        <div className="row">
-                            <div className="col-xs-6 col-sm-6 col-md-6">
-                                <div className="form-group">
-                                    <input type="password" name="password" id="password" className="form-control input-sm" placeholder="Password" />
-                                </div>
-                            </div>
-                            <div className="col-xs-6 col-sm-6 col-md-6">
-                                <div className="form-group">
-                                    <input type="password" name="password_confirmation" id="password_confirmation" className="form-control input-sm" placeholder="Confirm Password" />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <Link to='/login'>Already have account</Link>
-                        </div>
-                        <input type="submit" value="Register" className="btn btn-info btn-block" />
-                    
-                    </form>
-                </div>
+                  <Form.Group className="mt-3" controlId="formGridEmail">
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control
+                      type="email"
+                      placeholder="name@example.com"
+                      onChange={(e) =>
+                        setDetails({ ...details, email: e.target.value })
+                      }
+                      value={details.email}
+                    />
+                  </Form.Group>
+                  <Row className="mt-3 mb-3">
+                    <Form.Group as={Col} controlId="formGridPassword">
+                      <Form.Label>Password</Form.Label>
+                      <Form.Control
+                        type="password"
+                        placeholder="Enter password"
+                        onChange={(e) =>
+                          setDetails({ ...details, password: e.target.value })
+                        }
+                        value={details.password}
+                      />
+                    </Form.Group>
+
+                    <Form.Group as={Col} controlId="formGridConfirmPassword">
+                      <Form.Label>Confirm Password</Form.Label>
+                      <Form.Control
+                        type="password"
+                        placeholder="Confirm Password"
+                        onChange={(e) =>
+                          setDetails({
+                            ...details,
+                            confirmpassword: e.target.value,
+                          })
+                        }
+                        value={details.confirmpassword}
+                      />
+                    </Form.Group>
+                  </Row>
+                  <div>Already have an account?</div>
+                  <Row className="mb-3">
+                    <Link to="/login">Sign in</Link>
+                  </Row>
+                  <Button variant="success" type="submit" onClick={handleSubmitClick}>
+                    Sign up
+                  </Button>
+                </Form>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
     </div>
   )
 }

@@ -1,36 +1,47 @@
-import React, {useState} from 'react'
-import 'bootstrap/dist/css/bootstrap.min.css';
-import {Navbar, Container, Button} from 'react-bootstrap';
-import Popup from './Popup';
-import PopupDetail from './PopupDetail';
+import React, { useState } from 'react'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import { Navbar, Container, Button } from 'react-bootstrap'
+import PopUpAlert from './PopUpAlert'
+import DashboardCard from './DashboardCard'
 
 const DashBoard = () => {
-  const [buttonPopup, setButtonPopup] = useState(false);
-
+  const [modalShow, setModalShow] = useState(true)
+  
   return (
-    <div className="DashboardPage">
-      <Navbar>
+    <div className="dashboardPage">
+      <Navbar bg="dark" variant="dark">
         <Container>
-          <Navbar.Brand href="#home">Fire Alart</Navbar.Brand>
+          <Navbar.Brand href="#home">
+            <img
+              alt=""
+              src="https://cdn-icons-png.flaticon.com/512/216/216295.png"
+              width="30"
+              height="30"
+              className="d-inline-block align-top"
+            />{' '}
+            Fire Alarm
+          </Navbar.Brand>
           <Navbar.Toggle />
           <Navbar.Collapse className="justify-content-end">
+            <Button
+              className="justify-content-end"
+              variant="danger"
+              onClick={() => setModalShow(true)}
+            >
+              Emergency Alert
+            </Button>
+            <PopUpAlert show={modalShow} onHide={() => setModalShow(false)} />
+          </Navbar.Collapse>
+          <Navbar.Collapse className="justify-content-end">
             <Navbar.Text>
-              Signed in as: <a href="#login">Mark Otto</a>
+              Signed in as: <a href="#login">Pangpond</a>
             </Navbar.Text>
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      <div className="dashboardcard">
-        <div className="circle" />
-        <br/>
-        <p>Place</p>
-        <br/>
-        <p>Status</p>
-        <br/>
-        <Button onClick={() => setButtonPopup(true)}>Detail</Button>
-        <Popup trigger={buttonPopup} closePopup={() => setButtonPopup(false)}>
-          <PopupDetail/>
-        </Popup>
+      <div class="card-list">
+        <DashboardCard></DashboardCard>
+        {/* <DashboardCard></DashboardCard> */}
       </div>
     </div>
   )

@@ -1,95 +1,60 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
+@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
 .loginPage {
-  background-color: gray;
+  font-family: 'Inter', sans-serif;
+  background-image: url("https://images.pexels.com/photos/103592/pexels-photo-103592.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940");
+  background-position: center;
+  background-size: cover;
   min-height: 100vh;
 }
 
 #login .container #login-row #login-column #login-box {
-  margin-top: 120px;
+  padding: 2rem;
+  margin-top: 60px;
   max-width: 600px;
-  height: 320px;
-  border: 1px solid #9C9C9C;
-  background-color: #EAEAEA;
+  border: 1px solid #9c9c9c;
+  border-radius: 10px;
+  background-color: #eaeaea;
 }
-#login .container #login-row #login-column #login-box #login-form {
-  padding: 20px;
-}
-#login .container #login-row #login-column #login-box #login-form #register-link {
-  margin-top: -85px;
+
+.alert-header {
+  color: red;
 }
 
 .centered-form {
-	margin-top: 60px;
+  margin-top: 60px;
   display: flex;
   justify-content: center;
   align-items: center;
-  height:100vh; 
+  height: 100vh;
 }
 
-.centered-form .panel{
-	background: rgba(255, 255, 255, 0.8);
-	box-shadow: rgba(0, 0, 0, 0.3) 20px 20px 20px;
+.centered-form .panel {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: rgba(0, 0, 0, 0.3) 20px 20px 20px;
 }
 
 .dashboardPage {
-  background-color: #282c34;
+  background-color: grey;
+  /* background-image: url("https://images.pexels.com/photos/2170473/pexels-photo-2170473.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"); */
+  background-size: cover;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.dashboardcard {
-  padding: 2em 0;
-  height: 350px;
-  width: 350px;
-  color: white;
-  border: black;
-  border-radius: 10px;
-  overflow: hidden;
-  background-color: gray;
+.card-list {
+  margin-left: auto;
+  margin-right: auto;
+  align-items: center;
+  padding: 3rem;
+  display: flex;
+  /* grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); */
+  gap: 3rem;
+}
+
+.card-body {
   text-align: center;
+  padding: 0 1rem 1rem;
 }
 
 .circle {
@@ -98,15 +63,37 @@
   margin-right: auto;
   width: 100px;
   height: 100px;
-  background-color: green;
   border-radius: 50%;
+}
+.circle.emergency {
+  background-color: red;
+}
+
+.circle.warning {
+  background-color: orange;
+}
+
+.circle.normal {
+  background-color: green;
+}
+
+.status-text.emergency {
+  color: red;
+}
+
+.status-text.warning {
+  color: orange;
+}
+
+.status-text.normal {
+  color: green;
 }
 
 .detailpage {
   padding-top: 138rem;
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr))
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 }
 
 .popup {
@@ -131,4 +118,39 @@
 
 .popupInner .close-btn {
   position: absolute;
+}
+
+.modal-body
+{
+    height: 100%;
+    border-bottom: 0px;
+}
+
+.modal-content
+{
+    border-radius: 6px;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    background-color: transparent;
+}
+
+.modal-footer
+{
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    -webkit-border-bottom-left-radius: 6px;
+    -webkit-border-bottom-right-radius: 6px;
+    -moz-border-radius-bottomleft: 6px;
+    -moz-border-radius-bottomright: 6px;
+}
+
+.modal-header
+{
+    border-bottom: 0 none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    -webkit-border-top-left-radius: 6px;
+    -webkit-border-top-right-radius: 6px;
+    -moz-border-radius-topleft: 6px;
+    -moz-border-radius-topright: 6px;
 }
