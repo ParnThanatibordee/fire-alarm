@@ -62,7 +62,6 @@ class UserRegistration(BaseModel):
 
 
 class Alarm(BaseModel):
-    number: int
     gas: int
     flame1: int
     flame2: int
@@ -155,9 +154,9 @@ def configure(alarm: Configure):
         raise HTTPException(404, "Not have data of this number.")
     
 
-@app.get("/fire-alarm/alarm")  # get-hardware
-def alarm():
-    alarm = avg_collection.find_one({'number': 1}, {'_id': 0})  # search number:1
+@app.get("/fire-alarm/alarm/{num}")  # get-hardware
+def alarm(num: int):
+    alarm = avg_collection.find_one({'number': num}, {'_id': 0})  # search number:1
     if alarm: # Check if an alarming is required
         ref = configure_collection.find_one({'number': alarm['number']}, {'_id': 0})
         flame = 1 if removeError(alarm['flame']) < ref['ref_flame'] else 0
@@ -189,52 +188,52 @@ def line_notify(alarm: dict):
             requests.post(url, headers=headers, data={'message': msg}) # send line notification
 
 
-@app.post("/fire-alarm/update")  # post-hardware
-def update(alarm: Alarm):
+@app.post("/fire-alarm/update/{num}")  # post-hardware
+def update(alarm: Alarm, num: int):
     # add new record
     list_flame = [alarm.flame1, alarm.flame2, alarm.flame3]
     list_temp = [alarm.temp1, alarm.temp2, alarm.temp3]
-    alarm_dict = {'number': alarm.number, 'flame': list_flame,
+    alarm_dict = {'number': num, 'flame': list_flame,
                   'gas': alarm.gas, 'temp': list_temp,
                   'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
     menu_collection.insert_one(alarm_dict)
 
     # delete old record
-    lst = list(menu_collection.find({'number': alarm.number}, {'_id': 0}))
+    lst = list(menu_collection.find({'number': num}, {'_id': 0}))
     lst.sort(key=lambda x: x['update_time'])  # sort by time for delete excess data
     for i in range(len(lst) - 5):
         menu_collection.delete_one(lst[i])  # delete in db if more than 5
 
     # add default configure_collection
-    chk = configure_collection.find_one({'number': alarm.number}, {'_id': 0}) 
+    chk = configure_collection.find_one({'number': num}, {'_id': 0}) 
     if not chk:
-        default_dict = {'number': alarm.number, 'place': None, 'line_token': None,
+        default_dict = {'number': num, 'place': None, 'line_token': None,
                         'ref_flame': 500, 'ref_gas': 2000, 'ref_temp': 50,
                         'notification': True, 'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
         configure_collection.insert_one(default_dict)
 
     # update record_avg
-    chk = avg_collection.find_one({'number': alarm.number}, {'_id': 0})  # check data in avg_collection
+    chk = avg_collection.find_one({'number': num}, {'_id': 0})  # check data in avg_collection
     if chk == None:  # if not have data => add new
         avg_collection.insert_one(alarm_dict)
     else:  # if have date => update
         # calculate average record
         avg_flame = []
         avg_temp = []
-        lst = list(menu_collection.find({'number': alarm.number}, {'_id': 0}))
+        lst = list(menu_collection.find({'number': num}, {'_id': 0}))
         for i in range(3): # 3 sensors
             avg_flame.append(sum(d['flame'][i] for d in lst) / len(lst))
             avg_temp.append(sum(d['temp'][i] for d in lst) / len(lst))
         avg_gas = sum(d['gas'] for d in lst) / len(lst)
 
         # update
-        query = {"number": alarm.number}
+        query = {"number": num}
         new = {"$set": {"flame": avg_flame, "temp": avg_temp,
                         "gas": avg_gas, 'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
         avg_collection.update_one(query, new)
     
         # line notify
-        res = avg_collection.find_one({"number": alarm.number})
+        res = avg_collection.find_one({"number": num})
         res["flame"] = removeError(avg_flame)
         res["temp"] = removeError(avg_temp)
         line_notify(res)
