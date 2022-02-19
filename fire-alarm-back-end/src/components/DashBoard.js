@@ -4,59 +4,44 @@ import { Place } from "./DashBoardCard"
 import Popup from "./Popup"
 import PopUpAlert from "./PopUpAlert"
 import axios from "axios"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faFire } from "@fortawesome/free-solid-svg-icons"
 
 const DashBoard = () => {
-  // const Mockresponse = {
-  //   room: [
-  //     {
-  //       number: 1,
-  //       place: "University",
-  //       current_flame: true,
-  //       current_gas: 300.0,
-  //       current_temp: 277.5,
-  //       ref_gas: 2000,
-  //       ref_temp: 50.5,
-  //       flame_notification: true,
-  //       gas_notification: true,
-  //       temp_notification: true,
-  //       line_notification: true,
-  //       emergency: true,
-  //     },
-  //     {
-  //       number: 2,
-  //       place: "204",
-  //       current_flame: false,
-  //       current_gas: 100.0,
-  //       current_temp: 25.5,
-  //       ref_gas: 2000,
-  //       ref_temp: 50.5,
-  //       flame_notification: true,
-  //       gas_notification: true,
-  //       temp_notification: true,
-  //       line_notification: true,
-  //       emergency: false,
-  //     },
-  //   ],
-  // }
   const [placeData, setPlaceData] = useState([])
   const [buttonPopup, setButtonPopup] = useState(false)
+  const [isEmergency, setIsEmergency] = useState(false)
 
   useEffect(() => {
     setInterval(getData, 1000)
   }, [])
 
+  useEffect(() => {
+    let temp = false
+    placeData.forEach((place) => {
+      if (place.emergency) temp = true
+    })
+    setIsEmergency(temp)
+  }, [placeData])
+
   const getData = async () => {
     const response = await axios.get(
       "https://ecourse.cpe.ku.ac.th/exceed15/api/fire-alarm/get-record"
     )
+    // const response = await axios.get("data.json")
     setPlaceData(response.data.room)
   }
 
   return (
     <div className="dashboardPage">
-      <Navbar>
+      <Navbar bg="dark" variant="dark">
         <Container>
-          <Navbar.Brand href="#home">Fire Alart</Navbar.Brand>
+          <Navbar.Brand href="#home">
+            <span style={{ color: "#ff9900" }}>
+              <FontAwesomeIcon icon={faFire} />
+            </span>{" "}
+            Fire Alart
+          </Navbar.Brand>
           <Navbar.Toggle />
           <Navbar.Collapse className="justify-content-end">
             <Navbar.Text>
@@ -68,14 +53,19 @@ const DashBoard = () => {
       <div className="container">
         <div className="d-flex justify-content-end">
           <Button
-            className="mb-3"
-            variant="danger"
+            className="my-3"
+            variant={isEmergency ? "danger" : "outline-secondary"}
             onClick={() => setButtonPopup(true)}
           >
             EMERGENCY
           </Button>
         </div>
-        <Popup trigger={buttonPopup} closePopup={() => setButtonPopup(false)}>
+        <Popup
+          trigger={buttonPopup}
+          closePopup={() => {
+            setButtonPopup(false)
+          }}
+        >
           <PopUpAlert
             places={placeData.filter((m) => {
               if (m.emergency) return m.place
