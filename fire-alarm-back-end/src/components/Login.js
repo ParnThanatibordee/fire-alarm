@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 import { Link } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Form from 'react-bootstrap/Form'
@@ -6,10 +7,36 @@ import { Button, Row } from 'react-bootstrap'
 
 const Login = () => {
     const [details, setDetails] = React.useState({ email: '', password: '' })
+    const [accessToken, setAccessToken] = useState('');
+    const [typeToken, setTypeToken] = useState('');
+    useEffect(() => {
+        window.localStorage.setItem('typetoken', typeToken);
+        window.localStorage.setItem('accesstoken', accessToken);
+    }, [typeToken, accessToken])
+
     const handleSubmitClick = async (e) => {
         e.preventDefault()
-        console.log(details)
+        console.log(details.email)
+
+        const loginFormData = new FormData();
+        loginFormData.append("username", details.email)
+        loginFormData.append("password", details.password)
+        try {
+            // make axios post request
+            const response = await axios({
+                method: "post",
+                url: "https://ecourse.cpe.ku.ac.th/exceed15/api/login",
+                data: loginFormData,
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            console.log(response);
+            setAccessToken(response.data.access_toke);
+            setTypeToken(response.data.token_type);
+        } catch (error) {
+            console.log(error)
+        }
     }
+
     return (
         <div className="loginPage">
             <h1 className="text-center text-white pt-5">Fire Alarm</h1>
