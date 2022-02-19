@@ -88,22 +88,22 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 def removeError(lst: list):
     # calculate percentage discrepancy
-    chk1 = (abs(lst[0] - lst[1]) / lst[0])*100
-    chk2 = (abs(lst[0] - lst[2]) / lst[0])*100
-    chk3 = (abs(lst[1] - lst[2]) / lst[0])*100
+    chk1 = (abs(lst[0] - lst[1]) / lst[0]) * 100
+    chk2 = (abs(lst[0] - lst[2]) / lst[0]) * 100
+    chk3 = (abs(lst[1] - lst[2]) / lst[0]) * 100
 
-    sum = 0 
+    sum = 0
     sensors = 0
     if (chk1 < 20 and chk2 < 20) or (chk1 < 20 and chk3 < 20):
         sum = lst[0] + lst[1] + lst[2]
         sensors = 3
-    elif chk1 < 20 :
+    elif chk1 < 20:
         sum = lst[0] + lst[1]
         sensors = 2
-    elif chk2 < 20 :
+    elif chk2 < 20:
         sum = lst[0] + lst[2]
         sensors = 2
-    elif chk3 < 20 :
+    elif chk3 < 20:
         sum = lst[1] + lst[2]
         sensors = 2
     else:
@@ -113,37 +113,63 @@ def removeError(lst: list):
     res = sum / sensors
     return res
 
-@app.get("/fire-alarm/get-record") #get-frontend
-def get_fire_record():
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = get_user(username=token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+
+async def get_current_active_user(current_user: User = Depends(get_current_user)):
+    if current_user.disabled:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+@app.get("/fire-alarm/get-record")  # get-frontend
+def get_fire_record(current_user: User = Depends(get_current_active_user)):
     room = avg_collection.find()
     result = []
     for r in room:
-        ref = configure_collection.find_one({"number":r['number']})
+        ref = configure_collection.find_one({"number": r['number']})
         result.append(
-            {   'number': r['number'],
-                'place': ref['place'],
-                'current_flame': removeError(r['flame']), 
-                'current_gas': r['gas'],
-                'current_temp': removeError(r['temp']),
-                'ref_flame': ref['ref_flame'],
-                'ref_gas': ref['ref_gas'],
-                'ref_temp': ref['ref_temp']})  
-                # default ref temp 50-58, ref gas 2000-5000
+            {'number': r['number'],
+             'place': ref['place'],
+             'current_flame': removeError(r['flame']),
+             'current_gas': r['gas'],
+             'current_temp': removeError(r['temp']),
+             'ref_flame': ref['ref_flame'],
+             'ref_gas': ref['ref_gas'],
+             'ref_temp': ref['ref_temp']})  # default ref temp 50-58, ref gas 2000-5000
 
     if room:
         return {'room': result}
     else:
         raise HTTPException(404, "Not have data of any alarm.")
-    
 
-@app.post("/fire-alarm/configure") # post-frontend
-def configure(alarm: Configure):
+
+@app.post("/fire-alarm/configure")  # post-frontend
+def configure(alarm: Configure, current_user: User = Depends(get_current_active_user)):
     chk = configure_collection.find_one({'number': alarm.number}, {'_id': 0})
-    if chk: # update configure_collection
-        new = { "$set": {"number": alarm.number, "place": alarm.place, "line_token": alarm.line_token,
-                "ref_flame": alarm.ref_flame, "ref_gas": alarm.ref_gas, "ref_temp": alarm.ref_temp,
-                "notification": alarm.notification,
-                "update_time": datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
+    if chk:  # update configure_collection
+        new = {"$set": {"number": alarm.number, "place": alarm.place, "line_token": alarm.line_token,
+                        "ref_flame": alarm.ref_flame, "ref_gas": alarm.ref_gas, "ref_temp": alarm.ref_temp,
+                        "notification": alarm.notification,
+                        "update_time": datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
 
         query = {'number': alarm.number}
         configure_collection.update_one(query, new)
@@ -152,12 +178,12 @@ def configure(alarm: Configure):
         }
     else:
         raise HTTPException(404, "Not have data of this number.")
-    
+
 
 @app.get("/fire-alarm/alarm/{num}")  # get-hardware
 def alarm(num: int):
     alarm = avg_collection.find_one({'number': num}, {'_id': 0})  # search number:1
-    if alarm: # Check if an alarming is required
+    if alarm:  # Check if an alarming is required
         ref = configure_collection.find_one({'number': alarm['number']}, {'_id': 0})
         flame = 1 if removeError(alarm['flame']) < ref['ref_flame'] else 0
         gas = 1 if alarm['gas'] > ref['ref_gas'] else 0
@@ -169,7 +195,7 @@ def alarm(num: int):
 
 def line_notify(alarm: dict):
     ref = configure_collection.find_one({'number': alarm['number']}, {'_id': 0})
-    if ref['line_token']  and ref['notification'] == True:  # user set line_token and notification is on
+    if ref['line_token'] and ref['notification'] == True:  # user set line_token and notification is on
         if (alarm['flame'] < ref['ref_flame'] or
                 alarm['gas'] > ref['ref_gas'] or alarm['temp'] > ref['ref_temp']):
             msg = "Warning!!\n"
@@ -185,7 +211,7 @@ def line_notify(alarm: dict):
             url = 'https://notify-api.line.me/api/notify'
             headers = {'content-type': 'application/x-www-form-urlencoded',
                        'Authorization': 'Bearer ' + ref['line_token']}
-            requests.post(url, headers=headers, data={'message': msg}) # send line notification
+            requests.post(url, headers=headers, data={'message': msg})  # send line notification
 
 
 @app.post("/fire-alarm/update/{num}")  # post-hardware
@@ -205,7 +231,7 @@ def update(alarm: Alarm, num: int):
         menu_collection.delete_one(lst[i])  # delete in db if more than 5
 
     # add default configure_collection
-    chk = configure_collection.find_one({'number': num}, {'_id': 0}) 
+    chk = configure_collection.find_one({'number': num}, {'_id': 0})
     if not chk:
         default_dict = {'number': num, 'place': None, 'line_token': None,
                         'ref_flame': 500, 'ref_gas': 2000, 'ref_temp': 50,
@@ -214,14 +240,14 @@ def update(alarm: Alarm, num: int):
 
     # update record_avg
     chk = avg_collection.find_one({'number': num}, {'_id': 0})  # check data in avg_collection
-    if chk == None:  # if not have data => add new
+    if chk is None:  # if not have data => add new
         avg_collection.insert_one(alarm_dict)
     else:  # if have date => update
         # calculate average record
         avg_flame = []
         avg_temp = []
         lst = list(menu_collection.find({'number': num}, {'_id': 0}))
-        for i in range(3): # 3 sensors
+        for i in range(3):  # 3 sensors
             avg_flame.append(sum(d['flame'][i] for d in lst) / len(lst))
             avg_temp.append(sum(d['temp'][i] for d in lst) / len(lst))
         avg_gas = sum(d['gas'] for d in lst) / len(lst)
@@ -231,7 +257,7 @@ def update(alarm: Alarm, num: int):
         new = {"$set": {"flame": avg_flame, "temp": avg_temp,
                         "gas": avg_gas, 'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
         avg_collection.update_one(query, new)
-    
+
         # line notify
         res = avg_collection.find_one({"number": num})
         res["flame"] = removeError(avg_flame)
@@ -239,7 +265,7 @@ def update(alarm: Alarm, num: int):
         line_notify(res)
 
     return {
-        "result" : "Update completed."
+        "result": "Update completed."
     }
 
 
@@ -281,32 +307,6 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-
-
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
-    user = get_user(username=token_data.username)
-    if user is None:
-        raise credentials_exception
-    return user
-
-
-async def get_current_active_user(current_user: User = Depends(get_current_user)):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
 
 
 @app.post("/login", response_model=Token)
