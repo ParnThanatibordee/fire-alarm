@@ -1,12 +1,12 @@
-import React from 'react'
+import React from "react"
 
-const PopUpAlert = () => {
+const PopUpAlert = ({ places }) => {
+  console.log(places)
   return (
     <div>
       <h1>EMERGENCY PLACE</h1>
-      <li>HOME</li>
+      {places.length > 0 ? places.map((p) => <p>{p}</p>) : <p>It's peaceful here</p>}
     </div>
-    
   )
 }
 
