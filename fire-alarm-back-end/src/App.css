@@ -37,29 +37,23 @@
   }
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
 .loginPage {
-  background-color: gray;
+  font-family: 'Inter', sans-serif;
+  background-image: url("https://images.pexels.com/photos/103592/pexels-photo-103592.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940");
+  background-position: center;
+  background-size: cover;
   min-height: 100vh;
 }
 
 #login .container #login-row #login-column #login-box {
-  margin-top: 120px;
+  padding: 2rem;
+  margin-top: 60px;
   max-width: 600px;
-  height: 320px;
   border: 1px solid #9c9c9c;
+  border-radius: 10px;
   background-color: #eaeaea;
-}
-#login .container #login-row #login-column #login-box #login-form {
-  padding: 20px;
-}
-#login
-  .container
-  #login-row
-  #login-column
-  #login-box
-  #login-form
-  #register-link {
-  margin-top: -85px;
 }
 
 .centered-form {
