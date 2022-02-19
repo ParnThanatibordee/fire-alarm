@@ -62,23 +62,25 @@ class UserRegistration(BaseModel):
 
 
 class Alarm(BaseModel):
-    gas: int
-    flame1: int
-    flame2: int
-    flame3: int
-    temp1: int
-    temp2: int
-    temp3: int
+    gas: float
+    flame1: float
+    flame2: float
+    flame3: float
+    temp1: float
+    temp2: float
+    temp3: float
 
 
 class Configure(BaseModel):
     number: int
     place: str
     line_token: str
-    ref_flame: int
-    ref_gas: int
-    ref_temp: int
-    notification: bool
+    ref_gas: float
+    ref_temp: float
+    flame_notification: bool
+    gas_notification: bool
+    temp_notification: bool
+    line_notification: bool
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -145,16 +147,23 @@ def get_fire_record(current_user: User = Depends(get_current_active_user)):
     room = avg_collection.find()
     result = []
     for r in room:
-        ref = configure_collection.find_one({"number": r['number']})
+        ref = configure_collection.find_one({"number":r['number']})
+
+        emergency = True if (removeError(r['flame']) < ref['ref_flame'] or # check emergency
+        r['gas'] > ref['ref_gas'] or removeError(r['temp']) > ref['ref_temp'] ) else False
+        
         result.append(
-            {'number': r['number'],
-             'place': ref['place'],
-             'current_flame': removeError(r['flame']),
-             'current_gas': r['gas'],
-             'current_temp': removeError(r['temp']),
-             'ref_flame': ref['ref_flame'],
-             'ref_gas': ref['ref_gas'],
-             'ref_temp': ref['ref_temp']})  # default ref temp 50-58, ref gas 2000-5000
+            {   'number': r['number'], 'place': ref['place'],
+                'current_flame': True if removeError(r['flame']) < ref['ref_flame'] else False , 
+                'current_gas': r['gas'], 'current_temp': removeError(r['temp']),
+                'ref_gas': ref['ref_gas'],'ref_temp': ref['ref_temp'],
+                'flame_notification': ref['flame_notification'], 
+                'gas_notification': ref['gas_notification'],
+                'temp_notification': ref['temp_notification'], 
+                'line_notification': ref['line_notification'],
+                'emergency': emergency
+                })  
+                # default ref temp 50-58, ref gas 2000-5000
 
     if room:
         return {'room': result}
@@ -165,11 +174,12 @@ def get_fire_record(current_user: User = Depends(get_current_active_user)):
 @app.post("/fire-alarm/configure")  # post-frontend
 def configure(alarm: Configure, current_user: User = Depends(get_current_active_user)):
     chk = configure_collection.find_one({'number': alarm.number}, {'_id': 0})
-    if chk:  # update configure_collection
-        new = {"$set": {"number": alarm.number, "place": alarm.place, "line_token": alarm.line_token,
-                        "ref_flame": alarm.ref_flame, "ref_gas": alarm.ref_gas, "ref_temp": alarm.ref_temp,
-                        "notification": alarm.notification,
-                        "update_time": datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
+    if chk: # update configure_collection
+        new = { "$set": {"place": alarm.place, "line_token": alarm.line_token,
+                "ref_gas": alarm.ref_gas, "ref_temp": alarm.ref_temp,
+                "flame_notification": alarm.flame_notification, "gas_notification": alarm.gas_notification,
+                "temp_notification": alarm.temp_notification, "line_notification": alarm.line_notification,
+                "update_time": datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
 
         query = {'number': alarm.number}
         configure_collection.update_one(query, new)
@@ -195,7 +205,7 @@ def alarm(num: int):
 
 def line_notify(alarm: dict):
     ref = configure_collection.find_one({'number': alarm['number']}, {'_id': 0})
-    if ref['line_token'] and ref['notification'] == True:  # user set line_token and notification is on
+    if ref['line_token']  and ref['line_notification']:  # user set line_token and notification is on
         if (alarm['flame'] < ref['ref_flame'] or
                 alarm['gas'] > ref['ref_gas'] or alarm['temp'] > ref['ref_temp']):
             msg = "Warning!!\n"
@@ -235,7 +245,9 @@ def update(alarm: Alarm, num: int):
     if not chk:
         default_dict = {'number': num, 'place': None, 'line_token': None,
                         'ref_flame': 500, 'ref_gas': 2000, 'ref_temp': 50,
-                        'notification': True, 'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
+                        'flame_notification': True, 'gas_notification': True, 
+                        'temp_notification': True, 'line_notification': True,
+                        'update_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}
         configure_collection.insert_one(default_dict)
 
     # update record_avg
