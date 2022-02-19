@@ -40,7 +40,7 @@ const DashBoard = () => {
             <span style={{ color: "#ff9900" }}>
               <FontAwesomeIcon icon={faFire} />
             </span>{" "}
-            Fire Alart
+            Fire Alarm
           </Navbar.Brand>
           <Navbar.Toggle />
           <Navbar.Collapse className="justify-content-end">

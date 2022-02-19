@@ -6,7 +6,7 @@ import Form from 'react-bootstrap/Form'
 import { Button, Row } from 'react-bootstrap'
 
 const Login = () => {
-    const [details, setDetails] = React.useState({ email: '', password: '' })
+    const [details, setDetails] = useState({ email: '', password: '' })
     const [accessToken, setAccessToken] = useState('');
     const [typeToken, setTypeToken] = useState('');
     useEffect(() => {
