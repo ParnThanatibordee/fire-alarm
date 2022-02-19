@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { Link } from 'react-router-dom'
+// import { Link } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Form from 'react-bootstrap/Form'
 import { Button } from 'react-bootstrap'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faFire } from "@fortawesome/free-solid-svg-icons"
 
 const Login = () => {
     const [details, setDetails] = useState({ email: '', password: '' })
@@ -40,7 +42,7 @@ const Login = () => {
 
     return (
         <div className="loginPage">
-            <h1 className="text-center text-white pt-5">Fire Alarm</h1>
+            <h1 className="text-center text-white pt-5 login-header"><FontAwesomeIcon className="fa fa-cog fa-fw" icon={faFire} color="orange" />Fire Alarm</h1>
             <div id="login">
                 <div className="container">
                     <div
@@ -50,7 +52,7 @@ const Login = () => {
                         <div id="login-column" className="col-md-6">
                             <div id="login-box" className="col-md-12">
                                 <Form>
-                                    <h4>Sign in</h4>
+                                    <h4 className="loginform-header">Sign in</h4>
                                     <Form.Group className="mb-3" controlId="formBasicEmail">
                                         <Form.Label>Email address</Form.Label>
                                         <Form.Control

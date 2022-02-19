@@ -9,8 +9,8 @@ import { faFire } from "@fortawesome/free-solid-svg-icons"
 
 const DashBoard = () => {
 
-  const typetoken = window.localStorage.getItem('typetoken')
-  const accessToken = window.localStorage.getItem('accesstoken')
+  // const typetoken = window.localStorage.getItem('typetoken')
+  // const accessToken = window.localStorage.getItem('accesstoken')
   const [placeData, setPlaceData] = useState([])
   const [buttonPopup, setButtonPopup] = useState(false)
   const [isEmergency, setIsEmergency] = useState(false)
@@ -47,7 +47,7 @@ const DashBoard = () => {
     <div className="dashboardPage">
       <Navbar bg="dark" variant="dark">
         <Container>
-          <Navbar.Brand href="#home">
+          <Navbar.Brand className="dashboardPage-header"href="#home">
             <span style={{ color: "#ff9900" }}>
               <FontAwesomeIcon icon={faFire} />
             </span>{" "}
@@ -55,8 +55,8 @@ const DashBoard = () => {
           </Navbar.Brand>
           <Navbar.Toggle />
           <Navbar.Collapse className="justify-content-end">
-            <Navbar.Text>
-              Signed in as: <a href="#login">Mark Otto</a>
+            <Navbar.Text className="sign-in-name">
+              Signed in as: <a href="#login">Full Name</a>
             </Navbar.Text>
           </Navbar.Collapse>
         </Container>
@@ -64,7 +64,7 @@ const DashBoard = () => {
       <div className="container">
         <div className="d-flex justify-content-end">
           <Button
-            className="my-3"
+            className="my-3 button-emer"
             variant={isEmergency ? "danger" : "outline-secondary"}
             onClick={() => setButtonPopup(true)}
           >

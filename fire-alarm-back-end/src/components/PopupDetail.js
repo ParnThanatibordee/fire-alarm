@@ -31,7 +31,7 @@ const PopupDetail = ({ detail }) => {
                 {current_temp.toFixed(2)}
               </span>
               <span style={{ color: "grey" }}>/{ref_temp.toFixed(2)}°C</span>
-              <p>{current_temp >= ref_temp ? "Not Good." : "Is OK."}</p>
+              <p>{current_temp >= ref_temp ? "Not Good" : "Normal"}</p>
             </div>
           </div>
         )}
@@ -49,7 +49,7 @@ const PopupDetail = ({ detail }) => {
                 {current_gas.toFixed(2)}
               </span>
               <span style={{ color: "grey" }}>/{ref_gas.toFixed(2)} ppm</span>
-              <p>{current_gas >= ref_gas ? "Not Good." : "Is OK."}</p>
+              <p>{current_gas >= ref_gas ? "Not Good" : "Normal"}</p>
             </div>
           </div>
         )}
@@ -57,7 +57,7 @@ const PopupDetail = ({ detail }) => {
           <div className="col-12 col-md-6 col-lg">
             <h5>Flame</h5>
             <p className="fw-bold">
-              {current_flame ? "Burn Burnnnnn!!!!!!!!" : "No"}
+              {current_flame ? "DETECTED" : "Not Detected"}
             </p>
           </div>
         )}

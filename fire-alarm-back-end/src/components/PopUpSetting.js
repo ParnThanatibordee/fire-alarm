@@ -144,7 +144,7 @@ export default function PopUpSetting({ noti }) {
     <div>
       <p>Fire Alarm Setting</p>
       <p>
-        Line Notification <SwitchButton bool={noti.line_notification} linecallback={linecallbackState} />
+        LINE Notification <SwitchButton bool={noti.line_notification} linecallback={linecallbackState} />
       </p>
       <p>
         Fire <FireSwitchButton bool={noti.flame_notification} firecallback={firecallbackState} />
@@ -200,7 +200,7 @@ export default function PopUpSetting({ noti }) {
             value={details.refgas}
           />
         </Form.Group>
-        <div>
+        <div className="text-center">
           <Button
             className="mb-3"
             variant="outline-success"
@@ -209,7 +209,7 @@ export default function PopUpSetting({ noti }) {
           >
             Save changes
           </Button>
-        </div>
+          </div>
       </Form>
     </div>
   )
