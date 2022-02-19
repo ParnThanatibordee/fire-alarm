@@ -62,22 +62,21 @@ class UserRegistration(BaseModel):
 
 
 class Alarm(BaseModel):
-    gas: int
-    flame1: int
-    flame2: int
-    flame3: int
-    temp1: int
-    temp2: int
-    temp3: int
+    gas: float
+    flame1: float
+    flame2: float
+    flame3: float
+    temp1: float
+    temp2: float
+    temp3: float
 
 
 class Configure(BaseModel):
     number: int
     place: str
     line_token: str
-    ref_flame: int
-    ref_gas: int
-    ref_temp: int
+    ref_gas: float
+    ref_temp: float
     notification: bool
 
 
@@ -122,10 +121,9 @@ def get_fire_record():
         result.append(
             {   'number': r['number'],
                 'place': ref['place'],
-                'current_flame': removeError(r['flame']), 
+                'current_flame': True if removeError(r['flame']) < ref['ref_flame'] else False , 
                 'current_gas': r['gas'],
                 'current_temp': removeError(r['temp']),
-                'ref_flame': ref['ref_flame'],
                 'ref_gas': ref['ref_gas'],
                 'ref_temp': ref['ref_temp']})  
                 # default ref temp 50-58, ref gas 2000-5000
@@ -140,8 +138,8 @@ def get_fire_record():
 def configure(alarm: Configure):
     chk = configure_collection.find_one({'number': alarm.number}, {'_id': 0})
     if chk: # update configure_collection
-        new = { "$set": {"number": alarm.number, "place": alarm.place, "line_token": alarm.line_token,
-                "ref_flame": alarm.ref_flame, "ref_gas": alarm.ref_gas, "ref_temp": alarm.ref_temp,
+        new = { "$set": {"place": alarm.place, "line_token": alarm.line_token,
+                "ref_gas": alarm.ref_gas, "ref_temp": alarm.ref_temp,
                 "notification": alarm.notification,
                 "update_time": datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')}}
 
