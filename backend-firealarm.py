@@ -88,6 +88,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 
+# remove error in case of some sensor is broken
 def removeError(lst: list):
     # calculate percentage discrepancy
     chk1 = (abs(lst[0] - lst[1]) / lst[0]) * 100
@@ -142,6 +143,7 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     return current_user
 
 
+# get record of average value
 @app.get("/fire-alarm/get-record")  # get-frontend
 def get_fire_record(current_user: User = Depends(get_current_active_user)):
     room = avg_collection.find()
@@ -171,6 +173,7 @@ def get_fire_record(current_user: User = Depends(get_current_active_user)):
         raise HTTPException(404, "Not have data of any alarm.")
 
 
+# config the setting status for example, set reference value, turn on/off line notification etc.
 @app.post("/fire-alarm/configure")  # post-frontend
 def configure(alarm: Configure, current_user: User = Depends(get_current_active_user)):
     chk = configure_collection.find_one({'number': alarm.number}, {'_id': 0})
@@ -190,6 +193,7 @@ def configure(alarm: Configure, current_user: User = Depends(get_current_active_
         raise HTTPException(404, "Not have data of this number.")
 
 
+# alarm the normal or warning status
 @app.get("/fire-alarm/alarm/{num}")  # get-hardware
 def alarm(num: int):
     alarm = avg_collection.find_one({'number': num}, {'_id': 0})  # search number:1
@@ -203,6 +207,7 @@ def alarm(num: int):
         raise HTTPException(404, "Not have data of this number.")
 
 
+# send line notify message to line token
 def line_notify(alarm: dict):
     ref = configure_collection.find_one({'number': alarm['number']}, {'_id': 0})
     if ref['line_token']  and ref['line_notification']:  # user set line_token and notification is on
@@ -285,10 +290,12 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
+# hashed password
 def get_password_hash(password):
     return pwd_context.hash(password)
 
 
+# get data of user in database(mongodb)
 def get_user(username: str):
     users = db['users'].find({}, {"_id": 0})
     database = {}
@@ -301,6 +308,7 @@ def get_user(username: str):
         return UserInDB(**user_dict)
 
 
+# user input password equal to user hashed password
 def authenticate_user(username: str, password: str):
     user = get_user(username)
     if not user:
@@ -321,6 +329,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
+# login to grant access_token
 @app.post("/login", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = authenticate_user(form_data.username, form_data.password)
@@ -337,6 +346,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+# create user for test
 @app.post('/register')
 async def create_user(user: UserRegistration):
     # add event not create if username already exist
@@ -365,6 +375,7 @@ async def create_user(user: UserRegistration):
     }
 
 
+# check authentication that user has to login first
 @app.get("/users/me", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
