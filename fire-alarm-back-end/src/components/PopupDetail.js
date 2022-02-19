@@ -13,7 +13,7 @@ const PopupDetail = ({ detail }) => {
     temp_notification,
   } = detail
   return (
-    <div className="popup-detail">
+    <div className="popup-detail text-center">
       <h4>PLACE : {place}</h4>
       <br />
       <div className="row">
