@@ -192,7 +192,7 @@ def configure(alarm: Configure, current_user: User = Depends(get_current_active_
 
 @app.get("/fire-alarm/alarm/{num}")  # get-hardware
 def alarm(num: int):
-    alarm = avg_collection.find_one({'number': num}, {'_id': 0})  # search number:1
+    alarm = avg_collection.find_one({'number': num}, {'_id': 0})
     if alarm:  # Check if an alarming is required
         ref = configure_collection.find_one({'number': alarm['number']}, {'_id': 0})
         flame = 1 if removeError(alarm['flame']) < ref['ref_flame'] else 0
