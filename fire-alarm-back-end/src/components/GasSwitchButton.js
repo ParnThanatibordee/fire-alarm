@@ -1,9 +1,12 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import "./SwitchButton.css";
 
 const SwitchButton = props => {
   const [isToggled, setIsToggled] = useState(props.bool);
-  const onToggle = () => setIsToggled(!isToggled);
+  const onToggle = () => {
+    setIsToggled(!isToggled);
+    props.gascallback(!isToggled);
+  };
   return (
     <label className="toggle-switch">
       <input type="checkbox" checked={isToggled} onChange={onToggle} />

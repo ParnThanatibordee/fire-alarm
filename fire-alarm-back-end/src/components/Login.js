@@ -3,12 +3,13 @@ import axios from 'axios'
 import { Link } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Form from 'react-bootstrap/Form'
-import { Button, Row } from 'react-bootstrap'
+import { Button } from 'react-bootstrap'
 
 const Login = () => {
     const [details, setDetails] = useState({ email: '', password: '' })
     const [accessToken, setAccessToken] = useState('');
     const [typeToken, setTypeToken] = useState('');
+
     useEffect(() => {
         window.localStorage.setItem('typetoken', typeToken);
         window.localStorage.setItem('accesstoken', accessToken);
@@ -30,7 +31,7 @@ const Login = () => {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             console.log(response);
-            setAccessToken(response.data.access_toke);
+            setAccessToken(response.data.access_token);
             setTypeToken(response.data.token_type);
         } catch (error) {
             console.log(error)
@@ -73,10 +74,10 @@ const Login = () => {
                                             value={details.password}
                                         />
                                     </Form.Group>
-                                    <div>Don't have an account?</div>
+                                    {/* <div>Don't have an account?</div>
                                     <Row className="mb-3">
                                         <Link to="/signup">Sign up</Link>
-                                    </Row>
+                                    </Row> */}
                                     <Button
                                         variant="success"
                                         type="submit"

@@ -1,5 +1,5 @@
 import './App.css';
-import {BrowserRouter as Router, Switch, Route} from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Login from './components/Login';
 import SignUp from './components/SignUp';
@@ -10,7 +10,6 @@ function App() {
     <Router>
       <Switch>
         <Route exact path="/login" component={Login} />
-        <Route exact path="/signup" component={SignUp} />
         <Route exact path="/dashboard" component={DashBoard} />
         <Route exact path="*" component={Login} />
       </Switch>
