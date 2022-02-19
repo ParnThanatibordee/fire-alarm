@@ -1,15 +1,40 @@
 import React from "react"
 
 const PopupDetail = ({ detail }) => {
-  const { fire, temp, ref_temp, gas, ref_gas, place } = detail
+  const { current_flame, current_temp, ref_temp, current_gas, ref_gas, place } =
+    detail
   return (
     <div>
-      <h3>PLACE : {place}</h3>
-      <p>Temperature : {temp} C</p>
-      <p>Control Value Temperature : {ref_temp}</p>
-      <p>Gas : {gas}</p>
-      <p>Control Value Gas : {ref_gas}</p>
-      <p>{fire ? "Very Hot" : "Too Cool"}</p>
+      <h4>PLACE : {place}</h4>
+      <p></p>
+      <div className="container">
+        <div className="row">
+          <div className="col">
+            <h5>Temperature</h5>
+            {/* <p>Temperature : {current_temp} °C</p>
+            <p>Control Value Temperature : {ref_temp} °C</p>
+            <p>{current_temp >= ref_temp ? "Not Good." : "Is OK."}</p> */}
+            <div>
+              <span
+                style={{ color: "green", fontWeight: "bold", fontSize: "2em" }}
+              >
+                {current_temp}°C
+              </span>
+              /<span style={{ color: "red" }}>{ref_temp}°C</span>
+            </div>
+          </div>
+          <div className="col mx-4">
+            <h5>Gas</h5>
+            <p>Gas : {current_gas} ppm</p>
+            <p>Control Value Gas : {ref_gas} ppm</p>
+            <p>{current_gas >= ref_gas ? "Not Good." : "Is OK."}</p>
+          </div>
+          <div className="col">
+            <h5>Flame</h5>
+            <p>{current_flame ? "Burn Burnnnnn!!!!!!!!" : "No"}</p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

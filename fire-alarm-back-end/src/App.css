@@ -77,13 +77,13 @@
 
 .dashboardcard {
   padding: 2em 0;
-  height: 350px;
+  height: 300px;
   width: 100%;
-  color: white;
+  color: rgb(0, 0, 0);
   border: black;
   border-radius: 10px;
   overflow: hidden;
-  background-color: rgb(173, 159, 158);
+  background-color: rgb(216, 202, 156);
   text-align: center;
 }
 
@@ -119,9 +119,6 @@
 
 .popupInner {
   position: relative;
-  padding: 2rem 300px;
-  width: 100%;
-  max-width: 640%;
 }
 
 .popupInner .close-btn {
