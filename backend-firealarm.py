@@ -255,8 +255,8 @@ def update2(alarm: Alarm, num: int):
         # delete old record
         lst = list(menu_collection.find({'number': num}, {'_id': 0}))
         lst.sort(key=lambda x: x['update_time'])  # sort by time for delete excess data
-        for i in range(len(lst) - 5):
-            menu_collection.delete_one(lst[i])  # delete in db if more than 5
+        for i in range(len(lst) - 3):
+            menu_collection.delete_one(lst[i])  # delete in db if more than 3
 
         # add default configure_collection
         chk = configure_collection.find_one({'number': num}, {'_id': 0})
