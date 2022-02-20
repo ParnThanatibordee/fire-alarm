@@ -77,7 +77,8 @@
   border-width: 1px;
   border-radius: 10px;
   overflow: hidden;
-  background-color: #bebebe;
+  background-color: rgb(241, 227, 181);
+  /* pleas ASK before changing MY code */
   text-align: center;
 }
 
