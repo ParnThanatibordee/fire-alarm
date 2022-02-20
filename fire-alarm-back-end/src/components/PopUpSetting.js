@@ -1,21 +1,30 @@
 import React from "react"
-import axios from 'axios'
+import axios from "axios"
 import SwitchButton from "./SwitchButton"
 import FireSwitchButton from "./FireSwitchButton"
 import GasSwitchButton from "./GasSwitchButton"
 import TempSwitchButton from "./TempSwitchButton"
 import { Form, Button } from "react-bootstrap"
+import { noAuto } from "@fortawesome/fontawesome-svg-core"
 
+const checkinput = ( details ) =>{
+  if (details.place===""){
+    console.log("empty string")
+  }
+  if (details.place===null){
+    console.log("null")
+  }
+}
 
 export default function PopUpSetting({ noti }) {
   console.log(noti)
-  console.log(noti.line_notification);
-  console.log(noti.flame_notification);
-  console.log(noti.gas_notification);
-  console.log(noti.temp_notification);
+  console.log(noti.line_notification)
+  console.log(noti.flame_notification)
+  console.log(noti.gas_notification)
+  console.log(noti.temp_notification)
 
-  const typetoken = window.localStorage.getItem('typetoken')
-  const accessToken = window.localStorage.getItem('accesstoken')
+  const typetoken = window.localStorage.getItem("typetoken")
+  const accessToken = window.localStorage.getItem("accesstoken")
 
   console.log(typetoken)
   console.log(accessToken)
@@ -28,24 +37,25 @@ export default function PopUpSetting({ noti }) {
   })
 
   const handleSubmitClick = (e) => {
+    checkinput(details)
     e.preventDefault()
     try {
       axios({
         method: "post",
         url: "https://ecourse.cpe.ku.ac.th/exceed15/api/fire-alarm/configure",
-        hearder: `${typetoken} ${accessToken}`,
+        header: `${typetoken} ${accessToken}`,
         data: {
-          "number": noti.number,
-          "place": details.place,
-          "line_token": details.linetoken,
-          "ref_gas": details.refgas,
-          "ref_temp": details.reftemp,
-          "flame_notification": noti.flame_notification,
-          "gas_notification": noti.gas_notification,
-          "temp_notification": noti.temp_notification,
-          "line_notification": noti.line_notification,
+          number: noti.number,
+          place: `${details.place==="" ? noti.place : details.place}`,
+          line_token: `${details.linetoken==="" ? noti.line_token : details.linetoken}`,
+          ref_gas: `${details.refgas==="" ? noti.ref_gas : details.refgas}`,
+          ref_temp: `${details.reftemp==="" ? noti.ref_temp : details.reftemp}`,
+          flame_notification: noti.flame_notification,
+          gas_notification: noti.gas_notification,
+          temp_notification: noti.temp_notification,
+          line_notification: noti.line_notification,
         },
-      });
+      })
     } catch (error) {
       console.log(error)
     }
@@ -56,19 +66,19 @@ export default function PopUpSetting({ noti }) {
       axios({
         method: "post",
         url: "https://ecourse.cpe.ku.ac.th/exceed15/api/fire-alarm/configure",
-        hearder: `${typetoken} ${accessToken}`,
+        header: `${typetoken} ${accessToken}`,
         data: {
-          "number": noti.number,
-          "place": noti.place,
-          "line_token": "",
-          "ref_gas": noti.ref_gas,
-          "ref_temp": noti.ref_temp,
-          "flame_notification": noti.flame_notification,
-          "gas_notification": noti.gas_notification,
-          "temp_notification": noti.temp_notification,
-          "line_notification": data
+          number: noti.number,
+          place: noti.place,
+          line_token: "",
+          ref_gas: noti.ref_gas,
+          ref_temp: noti.ref_temp,
+          flame_notification: noti.flame_notification,
+          gas_notification: noti.gas_notification,
+          temp_notification: noti.temp_notification,
+          line_notification: data,
         },
-      });
+      })
     } catch (error) {
       console.log(error)
     }
@@ -78,19 +88,19 @@ export default function PopUpSetting({ noti }) {
       axios({
         method: "post",
         url: "https://ecourse.cpe.ku.ac.th/exceed15/api/fire-alarm/configure",
-        hearder: `${typetoken} ${accessToken}`,
+        header: `${typetoken} ${accessToken}`,
         data: {
-          "number": noti.number,
-          "place": noti.place,
-          "line_token": "",
-          "ref_gas": noti.ref_gas,
-          "ref_temp": noti.ref_temp,
-          "flame_notification": data,
-          "gas_notification": noti.gas_notification,
-          "temp_notification": noti.temp_notification,
-          "line_notification": noti.line_notification
+          number: noti.number,
+          place: noti.place,
+          line_token: "",
+          ref_gas: noti.ref_gas,
+          ref_temp: noti.ref_temp,
+          flame_notification: data,
+          gas_notification: noti.gas_notification,
+          temp_notification: noti.temp_notification,
+          line_notification: noti.line_notification,
         },
-      });
+      })
     } catch (error) {
       console.log(error)
     }
@@ -100,19 +110,19 @@ export default function PopUpSetting({ noti }) {
       axios({
         method: "post",
         url: "https://ecourse.cpe.ku.ac.th/exceed15/api/fire-alarm/configure",
-        hearder: `${typetoken} ${accessToken}`,
+        header: `${typetoken} ${accessToken}`,
         data: {
-          "number": noti.number,
-          "place": noti.place,
-          "line_token": "",
-          "ref_gas": noti.ref_gas,
-          "ref_temp": noti.ref_temp,
-          "flame_notification": noti.flame_notification,
-          "gas_notification": data,
-          "temp_notification": noti.temp_notification,
-          "line_notification": noti.line_notification
+          number: noti.number,
+          place: noti.place,
+          line_token: "",
+          ref_gas: noti.ref_gas,
+          ref_temp: noti.ref_temp,
+          flame_notification: noti.flame_notification,
+          gas_notification: data,
+          temp_notification: noti.temp_notification,
+          line_notification: noti.line_notification,
         },
-      });
+      })
     } catch (error) {
       console.log(error)
     }
@@ -122,19 +132,19 @@ export default function PopUpSetting({ noti }) {
       axios({
         method: "post",
         url: "https://ecourse.cpe.ku.ac.th/exceed15/api/fire-alarm/configure",
-        hearder: `${typetoken} ${accessToken}`,
+        header: `${typetoken} ${accessToken}`,
         data: {
-          "number": noti.number,
-          "place": noti.place,
-          "line_token": "",
-          "ref_gas": noti.ref_gas,
-          "ref_temp": noti.ref_temp,
-          "flame_notification": noti.flame_notification,
-          "gas_notification": noti.gas_notification,
-          "temp_notification": data,
-          "line_notification": noti.line_notification
+          number: noti.number,
+          place: noti.place,
+          line_token: "",
+          ref_gas: noti.ref_gas,
+          ref_temp: noti.ref_temp,
+          flame_notification: noti.flame_notification,
+          gas_notification: noti.gas_notification,
+          temp_notification: data,
+          line_notification: noti.line_notification,
         },
-      });
+      })
     } catch (error) {
       console.log(error)
     }
@@ -144,16 +154,32 @@ export default function PopUpSetting({ noti }) {
     <div>
       <p>Fire Alarm Setting</p>
       <p>
-        LINE Notification <SwitchButton bool={noti.line_notification} linecallback={linecallbackState} />
+        LINE Notification{" "}
+        <SwitchButton
+          bool={noti.line_notification}
+          linecallback={linecallbackState}
+        />
       </p>
       <p>
-        Fire <FireSwitchButton bool={noti.flame_notification} firecallback={firecallbackState} />
+        Fire{" "}
+        <FireSwitchButton
+          bool={noti.flame_notification}
+          firecallback={firecallbackState}
+        />
       </p>
       <p>
-        Gas <GasSwitchButton bool={noti.gas_notification} gascallback={gascallbackState} />
+        Gas{" "}
+        <GasSwitchButton
+          bool={noti.gas_notification}
+          gascallback={gascallbackState}
+        />
       </p>
       <p>
-        Temp <TempSwitchButton bool={noti.temp_notification} tempcallback={tempcallbackState} />
+        Temp{" "}
+        <TempSwitchButton
+          bool={noti.temp_notification}
+          tempcallback={tempcallbackState}
+        />
       </p>
       <Form>
         <Form.Group className="mb-3">
@@ -209,7 +235,7 @@ export default function PopUpSetting({ noti }) {
           >
             Save changes
           </Button>
-          </div>
+        </div>
       </Form>
     </div>
   )
