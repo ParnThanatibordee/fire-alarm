@@ -15,6 +15,8 @@ const DashBoard = () => {
   const [isEmergency, setIsEmergency] = useState(false)
 
   useEffect(() => {
+    // DONT DO THIS IN REAL PROJECT
+    if (!window.localStorage.accesstoken) window.location.replace("/login")
     setInterval(getData, 1000)
   }, [])
 
