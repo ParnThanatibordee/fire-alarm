@@ -13,7 +13,6 @@ const SignUp = () => {
     })
     const handleSubmitClick = async (e) => {
         e.preventDefault()
-        console.log(details)
     }
 
     return (

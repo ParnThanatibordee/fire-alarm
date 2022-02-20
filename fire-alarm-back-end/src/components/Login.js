@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react"
 import axios from "axios"
-// import { Link } from 'react-router-dom'
 import "bootstrap/dist/css/bootstrap.min.css"
 import Form from "react-bootstrap/Form"
 import { Button } from "react-bootstrap"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faFire } from "@fortawesome/free-solid-svg-icons"
-import { Redirect } from "react-router-dom"
 
 const Login = () => {
   const [details, setDetails] = useState({ email: "", password: "" })
@@ -20,7 +18,6 @@ const Login = () => {
 
   const handleSubmitClick = async (e) => {
     e.preventDefault()
-    console.log(details.email)
 
     const loginFormData = new FormData()
     loginFormData.append("username", details.email)
@@ -33,7 +30,6 @@ const Login = () => {
         data: loginFormData,
         headers: { "Content-Type": "multipart/form-data" },
       })
-      console.log(response)
       setAccessToken(response.data.access_token)
       setTypeToken(response.data.token_type)
       if (response.status === 200) {

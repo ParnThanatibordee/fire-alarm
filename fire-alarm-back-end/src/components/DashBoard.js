@@ -8,14 +8,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faFire } from "@fortawesome/free-solid-svg-icons"
 
 const DashBoard = () => {
-  // const typetoken = window.localStorage.getItem('typetoken')
-  // const accessToken = window.localStorage.getItem('accesstoken')
   const [placeData, setPlaceData] = useState([])
   const [buttonPopup, setButtonPopup] = useState(false)
   const [isEmergency, setIsEmergency] = useState(false)
 
   useEffect(() => {
-    // DONT DO THIS IN REAL PROJECT
     if (!window.localStorage.accesstoken) window.location.replace("/login")
     setInterval(getData, 1000)
   }, [])
@@ -32,14 +29,6 @@ const DashBoard = () => {
     const response = await axios.get(
       "https://ecourse.cpe.ku.ac.th/exceed15/api/fire-alarm/get-record"
     )
-
-    // const response = await (new Promise((resolve, reject) => {
-    //   resolve({
-    //     "data": { "room": [{ "number": 1, "place": "IUP Bar", "current_flame": false, "current_gas": 100.0, "current_temp": 30.0, "ref_gas": 2000, "ref_temp": 50, "flame_notification": true, "gas_notification": true, "temp_notification": false, "line_notification": true, "emergency": false }, { "number": 2, "place": "New Bar", "current_flame": false, "current_gas": 2100.0, "current_temp": 30.0, "ref_gas": 2000.0, "ref_temp": 50.0, "flame_notification": true, "gas_notification": true, "temp_notification": true, "line_notification": true, "emergency": true }] }
-    //   });
-    // }))
-
-    // const response = await axios.get("data.json")
     setPlaceData(response.data.room)
   }
 
@@ -54,11 +43,6 @@ const DashBoard = () => {
             Fire Alarm
           </Navbar.Brand>
           <Navbar.Toggle />
-          {/* <Navbar.Collapse className="justify-content-end">
-            <Navbar.Text className="sign-in-name">
-              Signed in as: <a href="#login">Full Name</a>
-            </Navbar.Text>
-          </Navbar.Collapse> */}
         </Container>
       </Navbar>
       <div className="container">

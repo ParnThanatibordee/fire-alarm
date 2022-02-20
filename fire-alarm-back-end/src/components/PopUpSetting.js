@@ -5,7 +5,6 @@ import FireSwitchButton from "./FireSwitchButton"
 import GasSwitchButton from "./GasSwitchButton"
 import TempSwitchButton from "./TempSwitchButton"
 import { Form, Button } from "react-bootstrap"
-import { noAuto } from "@fortawesome/fontawesome-svg-core"
 
 export default function PopUpSetting({ noti }) {
   const typetoken = window.localStorage.getItem("typetoken")
