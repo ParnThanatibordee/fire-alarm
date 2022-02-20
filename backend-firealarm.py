@@ -156,7 +156,7 @@ def get_fire_record():
         r['gas'] > ref['ref_gas'] or removeError(r['temp']) > ref['ref_temp'] ) else False
         
         result.append(
-            {   'number': r['number'], 'place': ref['place'],
+            {   'number': r['number'], 'place': ref['place'], 'line_token': ref['line_token'], 
                 'current_flame': True if removeError(r['flame']) < ref['ref_flame'] else False , 
                 'current_gas': r['gas'], 'current_temp': removeError(r['temp']),
                 'ref_gas': ref['ref_gas'],'ref_temp': ref['ref_temp'],
@@ -317,7 +317,7 @@ def get_user(username: str):
     database = {}
     for i in users:
         database[f"{i['username']}"] = i
-    print(database)
+    #print(database)
 
     if username in database:
         user_dict = database[username]
@@ -384,7 +384,7 @@ async def create_user(user: UserRegistration):
     print(user)
     registration_user = {"username": user.username, "full_name": user.full_name, "email": user.email,
                          "hashed_password": get_password_hash(user.password), "disabled": False}
-    print(registration_user)
+    #print(registration_user)
     db['users'].insert_one(registration_user)
     return {
         "result": "Successful registration."
