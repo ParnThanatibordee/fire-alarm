@@ -8,7 +8,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faFire } from "@fortawesome/free-solid-svg-icons"
 
 const DashBoard = () => {
-
   // const typetoken = window.localStorage.getItem('typetoken')
   // const accessToken = window.localStorage.getItem('accesstoken')
   const [placeData, setPlaceData] = useState([])
@@ -38,7 +37,6 @@ const DashBoard = () => {
     //   });
     // }))
 
-
     // const response = await axios.get("data.json")
     setPlaceData(response.data.room)
   }
@@ -47,18 +45,18 @@ const DashBoard = () => {
     <div className="dashboardPage">
       <Navbar bg="dark" variant="dark">
         <Container>
-          <Navbar.Brand className="dashboardPage-header"href="#home">
+          <Navbar.Brand className="dashboardPage-header" href="#home">
             <span style={{ color: "#ff9900" }}>
               <FontAwesomeIcon icon={faFire} />
             </span>{" "}
             Fire Alarm
           </Navbar.Brand>
           <Navbar.Toggle />
-          <Navbar.Collapse className="justify-content-end">
+          {/* <Navbar.Collapse className="justify-content-end">
             <Navbar.Text className="sign-in-name">
               Signed in as: <a href="#login">Full Name</a>
             </Navbar.Text>
-          </Navbar.Collapse>
+          </Navbar.Collapse> */}
         </Container>
       </Navbar>
       <div className="container">
